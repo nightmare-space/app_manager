@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_toolkit/config/config.dart';
-import 'package:provider/provider.dart';
-
+import 'package:global_repository/global_repository.dart';
 import 'page/already_install.dart';
 import 'provider/app_manager_provider.dart';
 import 'utils/app_utils.dart';
@@ -54,7 +52,7 @@ class _AppManagerState extends State<AppManager>
   }
 
   Future<void> init() async {
-    final Directory workDir = Directory(Config.filesPath + '/AppManager');
+    final Directory workDir = Directory(RuntimeEnvir.filesPath + '/AppManager');
     final bool exists = workDir.existsSync();
     if (!exists) {
       await workDir.create(recursive: true);
@@ -67,8 +65,6 @@ class _AppManagerState extends State<AppManager>
   AppManagerProvider appManagerProvider;
   @override
   Widget build(BuildContext context) {
-    appManagerProvider =
-        Provider.of<AppManagerProvider>(context, listen: false);
     currentColor = _colorAnimation.value;
     return Scaffold(
       appBar: AppBar(

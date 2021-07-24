@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_toolkit/config/config.dart';
 import 'package:flutter_toolkit/utils/platform_channel.dart';
+import 'package:global_repository/global_repository.dart';
 
 class ItemHeader extends StatefulWidget {
   const ItemHeader({Key key, this.packageName}) : super(key: key);
@@ -21,7 +22,7 @@ class _ItemHeaderState extends State<ItemHeader> {
   }
 
   Future<void> checkImageExist() async {
-    if (File('${Config.filesPath}/AppManager/.icon/${widget.packageName}')
+    if (File('${RuntimeEnvir.filesPath}/AppManager/.icon/${widget.packageName}')
         .existsSync()) {
       imgExist = true;
       setState(() {});

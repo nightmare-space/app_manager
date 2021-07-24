@@ -1,7 +1,8 @@
+import 'package:app_manager/src/model/app.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_toolkit/modules/app_manager/model/app.dart';
+import 'package:get/get.dart';
 
-class AppManagerProvider extends ChangeNotifier {
+class AppManagerProvider extends GetxController {
   //用户应用
   List<AppEntity> _userApps = <AppEntity>[];
   //系统应用
@@ -10,11 +11,11 @@ class AppManagerProvider extends ChangeNotifier {
   List<AppEntity> get sysApps => _sysApps;
   void setUserApps(List<AppEntity> map) {
     _userApps = map;
-    notifyListeners();
+    update();
   }
 
   void setSysApps(List<AppEntity> map) {
     _sysApps = map;
-    notifyListeners();
+    update();
   }
 }
