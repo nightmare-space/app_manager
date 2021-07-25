@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 import 'page/already_install.dart';
 import 'provider/app_manager_provider.dart';
@@ -18,10 +19,10 @@ class _AppManagerState extends State<AppManager>
   int _currentIndex = 0;
   Color currentColor;
   List<Color> colors = <Color>[
-    // Colors.indigo,
-    // Colors.deepPurple,
-    Colors.blueGrey,
-    Colors.teal,
+    Colors.indigo,
+    Colors.deepPurple,
+    // Colors.blueGrey,
+    // const Color(0xff25816b),
     // Colors.pink,
     Colors.brown,
   ];
@@ -39,15 +40,6 @@ class _AppManagerState extends State<AppManager>
       setState(() {});
     });
     animationController.forward();
-  }
-
-  @override
-  void didChangeDependencies() {
-    WidgetsBinding.instance.addPostFrameCallback(_onAfterRendering);
-    super.didChangeDependencies();
-  }
-
-  Future<void> _onAfterRendering(Duration timeStamp) async {
     init();
   }
 
@@ -62,17 +54,17 @@ class _AppManagerState extends State<AppManager>
     appManagerProvider.setSysApps(await AppUtils.getSysApps());
   }
 
-  AppManagerProvider appManagerProvider;
+  AppManagerController appManagerProvider = Get.find();
   @override
   Widget build(BuildContext context) {
     currentColor = _colorAnimation.value;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: currentColor,
-        elevation: 0.0,
-        title: const Text('应用管理'),
-        centerTitle: true,
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: currentColor,
+      //   elevation: 0.0,
+      //   title: const Text('应用管理'),
+      //   centerTitle: true,
+      // ),
       body: <Widget>[
         AlreadyInstall(),
         AlreadyInstall(),
@@ -106,7 +98,7 @@ class _AppManagerState extends State<AppManager>
           ),
         ],
         unselectedItemColor: Colors.grey,
-        selectedItemColor: currentColor,
+        selectedItemColor: Colors.indigo,
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
         onTap: (int index) {
