@@ -16,8 +16,12 @@ class Global {
   }
 
   Map<String, List<int>> iconCacheMap = {};
-  YanProcess process = YanProcess();
+  Executable process = YanProcess();
   Future<void> initProcess() async {
     await process.exec('su');
+  }
+
+  Future<String> exec(String script) {
+    return process.exec(script);
   }
 }

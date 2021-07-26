@@ -1,7 +1,9 @@
 import 'package:app_manager/model/app.dart';
+import 'package:app_manager/page/app_setting_page.dart';
 import 'package:app_manager/provider/app_manager_provider.dart';
 import 'package:app_manager/theme/app_colors.dart';
-import 'package:app_manager/widgets/item_header.dart';
+import 'package:app_manager/utils/route_extension.dart';
+import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -64,11 +66,14 @@ class CommonAppPageState extends State<CommonAppPage> {
                 setState(() {});
               },
               onLongPress: () {
-                showCustomDialog<void>(
-                    context: context,
-                    child: LongPress(
-                      apps: <AppEntity>[apps[i]],
-                    ));
+                push(AppSettingPage(
+                  entity: apps[i],
+                ));
+                // showCustomDialog<void>(
+                //     context: context,
+                //     child: LongPress(
+                //       apps: <AppEntity>[apps[i]],
+                //     ));
               },
               child: SizedBox(
                 height: 54.0,

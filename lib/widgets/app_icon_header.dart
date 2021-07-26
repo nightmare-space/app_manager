@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:app_manager/global/icon_store.dart';
 import 'package:app_manager/theme/app_colors.dart';
@@ -42,26 +43,32 @@ class _AppIconHeaderState extends State<AppIconHeader> {
         widget.packageName,
         await AppUtils.loadAppIcon(widget.packageName),
       );
-      Log.w('loadAppIcon $_bytes');
+      // Log.w('loadAppIcon $_bytes');
     }
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_bytes.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
+      return SizedBox(
+        width: 54,
+        height: 54,
         child: SpinKitThreeBounce(
           color: AppColors.accentColor,
           size: 16.0,
         ),
       );
     } else {
-      return Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Image.memory(
-          _bytes,
+      return SizedBox(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.memory(
+            Uint8List.fromList(_bytes),
+            gaplessPlayback: true,
+          ),
         ),
       );
     }

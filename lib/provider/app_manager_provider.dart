@@ -19,7 +19,7 @@ class AppManagerController extends GetxController {
 
   Future<void> cacheUserIcons() async {
     for (AppEntity entity in _userApps) {
-      Log.i('缓存 ${entity.packageName} 图标');
+      // Log.i('缓存 ${entity.packageName} 图标');
       if (IconStore().loadCache(entity.packageName).isEmpty) {
         IconStore().cache(
           entity.packageName,
@@ -31,7 +31,7 @@ class AppManagerController extends GetxController {
 
   Future<void> cacheSysIcons() async {
     for (AppEntity entity in _sysApps) {
-      Log.i('缓存 ${entity.packageName} 图标');
+      // Log.i('缓存 ${entity.packageName} 图标');
       IconStore().cache(
         entity.packageName,
         await AppUtils.loadAppIcon(entity.packageName),

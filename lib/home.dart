@@ -1,13 +1,24 @@
 import 'dart:io';
 
+import 'package:app_manager/utils/socket_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
+import 'global/global.dart';
 import 'page/already_install.dart';
 import 'provider/app_manager_provider.dart';
 import 'utils/app_utils.dart';
 
 class AppManager extends StatefulWidget {
+  AppManager({Key key, this.process}) : super(key: key) {
+    if (process != null) {
+      Global().process = process;
+    }
+    Get.put(AppManagerController());
+    Global().initProcess();
+  }
+  final Executable process;
   @override
   _AppManagerState createState() => _AppManagerState();
 }
@@ -58,62 +69,65 @@ class _AppManagerState extends State<AppManager>
   @override
   Widget build(BuildContext context) {
     currentColor = _colorAnimation.value;
-    return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: currentColor,
-      //   elevation: 0.0,
-      //   title: const Text('应用管理'),
-      //   centerTitle: true,
-      // ),
-      body: <Widget>[
-        AlreadyInstall(),
-        AlreadyInstall(),
-        AlreadyInstall(),
-      ][_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
+    return AnnotatedRegion(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        // appBar: AppBar(
+        //   backgroundColor: currentColor,
+        //   elevation: 0.0,
+        //   title: const Text('应用管理'),
+        //   centerTitle: true,
+        // ),
+        body: <Widget>[
+          AlreadyInstall(),
+          AlreadyInstall(),
+          AlreadyInstall(),
+        ][_currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.home,
+              ),
+              title: Text(
+                '已安装',
+              ),
             ),
-            title: Text(
-              '已安装',
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.pages,
+              ),
+              title: Text(
+                '运行中',
+              ),
             ),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.pages,
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.pages,
+              ),
+              title: Text(
+                '已冻结',
+              ),
             ),
-            title: Text(
-              '运行中',
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.pages,
-            ),
-            title: Text(
-              '已冻结',
-            ),
-          ),
-        ],
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Colors.indigo,
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        onTap: (int index) {
-          _colorAnimation = ColorTween(
-            begin: currentColor,
-            end: colors[index],
-          ).animate(animationController);
-          animationController.reset();
-          animationController.forward();
-          setState(
-            () {
-              _currentIndex = index;
-            },
-          );
-        },
+          ],
+          unselectedItemColor: Colors.grey,
+          selectedItemColor: Colors.indigo,
+          currentIndex: _currentIndex,
+          type: BottomNavigationBarType.fixed,
+          onTap: (int index) {
+            _colorAnimation = ColorTween(
+              begin: currentColor,
+              end: colors[index],
+            ).animate(animationController);
+            animationController.reset();
+            animationController.forward();
+            setState(
+              () {
+                _currentIndex = index;
+              },
+            );
+          },
+        ),
       ),
     );
   }
