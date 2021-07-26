@@ -40,11 +40,6 @@ public class AppInfo {
         pm = context.getPackageManager();
     }
 
-    private static Socket connect() throws IOException {
-        Socket socket = new Socket();
-        socket.connect(new InetSocketAddress("localhost", 4041));
-        return socket;
-    }
 
     static public byte[] Bitmap2Bytes(Bitmap bm) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -89,7 +84,7 @@ public class AppInfo {
         @SuppressLint("PrivateApi")
         ServerSocket serverSocket = new ServerSocket(4041);
         while (true) {
-            Log.e("socket启动", "socket启动");
+//            Log.e("socket启动", "socket启动");
             Socket socket = serverSocket.accept();
 
             InputStream is = socket.getInputStream();
@@ -118,7 +113,7 @@ public class AppInfo {
 //        Constructor<?> activityThreadConstructor = activityThreadClass.getDeclaredConstructor();
 //        activityThreadConstructor.setAccessible(true);
 //        Object activityThread = activityThreadConstructor.newInstance();
-            Log.e("socket启动", "socket启动");
+//            Log.e("socket启动", "socket启动");
             Socket socket = serverSocket.accept();
 
             InputStream is = socket.getInputStream();

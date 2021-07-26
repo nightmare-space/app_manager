@@ -3,14 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:global_repository/global_repository.dart';
 
 const int msgByteLen = 2;
 const int msgCodeByteLen = 2;
 const int minMsgByteLen = msgByteLen + msgCodeByteLen;
 
-class NetworkManager {
-  NetworkManager(this.address, this.port);
+class SocketWrapper {
+  SocketWrapper(this.address, this.port);
   final dynamic address;
   final int port;
   Socket socket;
@@ -31,7 +32,7 @@ class NetworkManager {
 
       return true;
     } catch (e) {
-      print('连接socket出现异常，e=${e.toString()}');
+      debugPrint('连接socket出现异常，e=${e.toString()}');
       return false;
     }
   }
@@ -74,29 +75,5 @@ class NetworkManager {
 
   void doneHandler() {
     socket.destroy();
-  }
-}
-
-mixin SocketManage {
-  static String host = 'xxx.xxx.xxx.xxx';
-  static int port = 80;
-  static Socket mSocket;
-  static Stream<List<int>> mStream;
-
-  static Future<void> initSocket() async {
-    await Socket.connect(host, port).then((Socket socket) {
-      mSocket = socket;
-      mStream = mSocket.asBroadcastStream(); //多次订阅的流 如果直接用socket.listen只能订阅一次
-    }).catchError((dynamic e) {
-      initSocket();
-    });
-  }
-
-  static void addParams(List<int> params) {
-    mSocket.add(params);
-  }
-
-  static void dispos() {
-    mSocket.close();
   }
 }

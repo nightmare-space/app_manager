@@ -66,13 +66,7 @@ public class MainActivity extends FlutterActivity {
 
 
     void GetApp(@NonNull FlutterEngine flutterEngine) {
-        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "GetAppIcon").setMethodCallHandler((call, result) -> {
-            new Thread(() -> {
-                AppInfo info = new AppInfo(getApplicationContext());
-                Bitmap bitmap = info.getBitmap(call.method);
-                runOnUiThread(() -> result.success(Bitmap2Bytes(bitmap)));
-            }).start();
-        });
+
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "jump").setMethodCallHandler((call, result) -> {
             new Thread(() -> {
                 List<String> arg = stringToList(call.method);
@@ -85,11 +79,6 @@ public class MainActivity extends FlutterActivity {
         });
     }
 
-    public byte[] Bitmap2Bytes(Bitmap bm) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        return baos.toByteArray();
-    }
 
     private List<String> stringToList(String strs) {
         String[] str = strs.split("\n");
@@ -97,26 +86,7 @@ public class MainActivity extends FlutterActivity {
     }
 
     void App(@NonNull FlutterEngine flutterEngine) {
-        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "App").setMethodCallHandler((call, result) -> new Thread(() -> {
-            List<String> id = stringToList(call.method);
-            StringBuilder builder = new StringBuilder();
-            for (String packageName : id) {
-                try {
-                    PackageInfo packages = getPackageManager().getPackageInfo(packageName, 0);
-                    builder.append(packages.applicationInfo.loadLabel(getPackageManager()));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        builder.append(" ").append(packages.applicationInfo.minSdkVersion);
-                        builder.append(" ").append(packages.applicationInfo.targetSdkVersion);
-                        builder.append(" ").append(packages.versionName);
-                        builder.append(" ").append(packages.getLongVersionCode()).append("\n");
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-            runOnUiThread(() -> result.success(builder.toString()));
 
-        }).start());
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "GetAppInfo").setMethodCallHandler((call, result) -> new Thread(() -> {
             try {
                 PackageInfo packages = getPackageManager().getPackageInfo(call.method, 0);

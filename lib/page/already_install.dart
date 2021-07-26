@@ -1,5 +1,5 @@
 import 'package:app_manager/model/app.dart';
-import 'package:app_manager/provider/app_manager_provider.dart';
+import 'package:app_manager/provider/app_manager_controller.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,7 @@ class _AlreadyInstallState extends State<AlreadyInstall>
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 1, vsync: this);
   }
 
   @override
@@ -30,42 +30,11 @@ class _AlreadyInstallState extends State<AlreadyInstall>
       body: SafeArea(
         child: Column(
           children: [
-            TabBar(
-              isScrollable: true,
-              indicatorPadding: const EdgeInsets.only(left: 0.0),
-              indicator: const RoundedUnderlineTabIndicator(
-                // insets:EdgeInsets.all(16.0),
-                radius: 25.0,
-                width: 72.0,
-                borderSide: BorderSide(
-                  width: 4.0,
-                  color: Color(0xff6002ee),
-                ),
-                // color: Color(0xff6002ee),
-                // borderRadius: BorderRadius.only(
-                //     topLeft: Radius.circular(25), topRight: Radius.circular(25)),
-              ),
-              controller: tabController,
-              labelStyle: const TextStyle(
-                color: Color(0xff6002ee),
-              ),
-              labelColor: const Color(0xff6002ee),
-              unselectedLabelColor: Colors.black,
-              tabs: const <Widget>[
-                Tab(
-                  child: Text('用户应用'),
-                ),
-                Tab(
-                  child: Text('系统应用'),
-                ),
-              ],
-            ),
             Expanded(
               child: TabBarView(
                 controller: tabController,
                 children: <Widget>[
                   CommonAppPage(),
-                  _SysApps(),
                 ],
               ),
             ),
@@ -74,105 +43,6 @@ class _AlreadyInstallState extends State<AlreadyInstall>
       ),
     );
   }
-}
-
-enum AppType {
-  SYSTEM,
-  USER,
-}
-
-class AppsEntityState<E extends StatefulWidget> extends State<E> {
-  AppType appType;
-  List<String> check = <String>[];
-  @override
-  Widget build(BuildContext context) {
-    final AppManagerController appManagerProvider = Get.find();
-    final List<AppEntity> apps = appType == AppType.USER
-        ? appManagerProvider.userApps
-        : appManagerProvider.sysApps;
-    if (apps.isEmpty) {
-      return SpinKitThreeBounce(
-        color: AppColors.accentColor,
-        size: 16.0,
-      );
-    } else {
-      return ListView.builder(
-        itemCount: apps.length,
-        itemBuilder: (BuildContext c, int i) {
-          final String packageName = apps[i].packageName;
-          return InkWell(
-            onTap: () {
-              if (check.contains(packageName)) {
-                check.remove(packageName);
-              } else {
-                check.add(packageName);
-              }
-              setState(() {});
-            },
-            onLongPress: () {
-              showCustomDialog<void>(
-                  context: context,
-                  child: LongPress(
-                    apps: <AppEntity>[apps[i]],
-                  ));
-            },
-            child: SizedBox(
-              height: 48.0,
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Expanded(
-                    child: Row(
-                      children: <Widget>[
-                        AppIconHeader(
-                          packageName: apps[i].packageName,
-                        ),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(apps[i].appName),
-                              SingleChildScrollView(
-                                controller: ScrollController(),
-                                scrollDirection: Axis.horizontal,
-                                child: Text(apps[i].packageName),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Checkbox(
-                    value: check.contains(packageName),
-                    onChanged: (bool v) {
-                      if (check.contains(packageName)) {
-                        check.remove(packageName);
-                      } else {
-                        check.add(packageName);
-                      }
-                      setState(() {});
-                    },
-                  )
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    }
-  }
-}
-
-// class _SysApps extends StatefulWidget {
-//   @override
-//   _SysAppsState createState() => _SysAppsState();
-// }
-class _SysApps extends StatefulWidget {
-  @override
-  AppsEntityState<_SysApps> createState() => AppsEntityState<_SysApps>();
 }
 
 class RoundedUnderlineTabIndicator extends Decoration {

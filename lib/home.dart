@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:app_manager/utils/socket_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 import 'global/global.dart';
 import 'page/already_install.dart';
-import 'provider/app_manager_provider.dart';
+import 'page/common_app_page.dart';
+import 'provider/app_manager_controller.dart';
 import 'utils/app_utils.dart';
 
 class AppManager extends StatefulWidget {
@@ -61,8 +63,8 @@ class _AppManagerState extends State<AppManager>
       await workDir.create(recursive: true);
     }
     await Directory(workDir.path + '/.icon').create();
-    appManagerProvider.setUserApps(await AppUtils.getUserApps());
-    appManagerProvider.setSysApps(await AppUtils.getSysApps());
+    appManagerProvider.getUserApp();
+    appManagerProvider.getSysApp();
   }
 
   AppManagerController appManagerProvider = Get.find();
@@ -78,19 +80,29 @@ class _AppManagerState extends State<AppManager>
         //   title: const Text('应用管理'),
         //   centerTitle: true,
         // ),
-        body: <Widget>[
-          AlreadyInstall(),
-          AlreadyInstall(),
-          AlreadyInstall(),
-        ][_currentIndex],
+        body: GetBuilder<AppManagerController>(builder: (ctl) {
+          return SafeArea(
+            child: <Widget>[
+              CommonAppPage(
+                appList: ctl.userApps,
+              ),
+              CommonAppPage(
+                appList: ctl.sysApps,
+              ),
+              CommonAppPage(),
+              CommonAppPage(),
+            ][_currentIndex],
+          );
+        }),
         bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
+          items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
+              icon: SvgPicture.asset(
+                'assets/app.svg',
+                width: 24,
               ),
               title: Text(
-                '已安装',
+                '用户',
               ),
             ),
             BottomNavigationBarItem(
@@ -98,17 +110,17 @@ class _AppManagerState extends State<AppManager>
                 Icons.pages,
               ),
               title: Text(
-                '运行中',
+                '系统',
               ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.pages,
-              ),
-              title: Text(
-                '已冻结',
-              ),
-            ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(
+            //     Icons.pages,
+            //   ),
+            //   title: Text(
+            //     '已冻结',
+            //   ),
+            // ),
           ],
           unselectedItemColor: Colors.grey,
           selectedItemColor: Colors.indigo,

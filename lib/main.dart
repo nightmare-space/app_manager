@@ -7,7 +7,7 @@ import 'package:global_repository/global_repository.dart';
 
 import 'global/global.dart';
 import 'home.dart';
-import 'provider/app_manager_provider.dart';
+import 'provider/app_manager_controller.dart';
 import 'utils/socket_util.dart';
 
 void main() {

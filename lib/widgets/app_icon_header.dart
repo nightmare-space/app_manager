@@ -23,6 +23,7 @@ class _AppIconHeaderState extends State<AppIconHeader> {
   @override
   void initState() {
     super.initState();
+    print('init');
     loadAppIcon();
     // checkImageExist();
   }
@@ -41,7 +42,7 @@ class _AppIconHeaderState extends State<AppIconHeader> {
     if ((_bytes = IconStore().loadCache(widget.packageName)).isEmpty) {
       _bytes = IconStore().cache(
         widget.packageName,
-        await AppUtils.loadAppIcon(widget.packageName),
+        await AppUtils.getAppIconBytes(widget.packageName),
       );
       // Log.w('loadAppIcon $_bytes');
     }
@@ -52,12 +53,13 @@ class _AppIconHeaderState extends State<AppIconHeader> {
 
   @override
   Widget build(BuildContext context) {
+    Log.w(widget.packageName);
     if (_bytes.isEmpty) {
       return SizedBox(
         width: 54,
         height: 54,
-        child: SpinKitThreeBounce(
-          color: AppColors.accentColor,
+        child: SpinKitDoubleBounce(
+          color: Colors.indigo,
           size: 16.0,
         ),
       );
