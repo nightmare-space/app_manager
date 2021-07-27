@@ -56,3 +56,4 @@ remote.tar
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
 *.jks
+android/app/build
