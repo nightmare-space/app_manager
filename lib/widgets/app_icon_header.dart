@@ -23,7 +23,6 @@ class _AppIconHeaderState extends State<AppIconHeader> {
   @override
   void initState() {
     super.initState();
-    print('init');
     loadAppIcon();
     // checkImageExist();
   }
@@ -53,7 +52,6 @@ class _AppIconHeaderState extends State<AppIconHeader> {
 
   @override
   Widget build(BuildContext context) {
-    Log.w(widget.packageName);
     if (_bytes.isEmpty) {
       return SizedBox(
         width: 54,

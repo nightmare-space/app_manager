@@ -55,97 +55,87 @@ public class AppInfo {
         Object activityThread = activityThreadConstructor.newInstance();
         Method getSystemContextMethod = activityThreadClass.getDeclaredMethod("getSystemContext");
         Context ctx = (Context) getSystemContextMethod.invoke(activityThread);
-
-        System.out.println("执行中");
-        System.out.println(ctx);
         new Thread(() -> {
             try {
-                System.out.println("startIconServer");
-                AppInfo.startIconServer(ctx);
+                startServer(ctx);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
-        new Thread(() -> {
-            try {
-                System.out.println("startAppInfoServer");
-                AppInfo.startAppInfoServer(ctx);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-
         System.out.println("wait");
+        System.out.flush();
         System.in.read();
 
     }
 
-    public static void startIconServer(Context context) throws IOException {
-        @SuppressLint("PrivateApi")
+    public static void startServer(Context context) throws IOException {
         ServerSocket serverSocket = new ServerSocket(4041);
-        while (true) {
-//            Log.e("socket启动", "socket启动");
+        while(true){
+            System.out.println("等待连接");
+            System.out.flush();
             Socket socket = serverSocket.accept();
-
+            System.out.println("连接成功");
+            System.out.flush();
             InputStream is = socket.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String packageName = br.readLine();
-            OutputStream os = socket.getOutputStream();
-            AppInfo appInfo = new AppInfo(context);
-            Bitmap bitmap = appInfo.getBitmap(packageName);
-            if (bitmap != null) {
-                os.write(Bitmap2Bytes(bitmap));
+            String data = br.readLine();
+            if (data.startsWith("getIconData")) {
+                System.out.println("响应Icon信息");
+                System.out.flush();
+                Log.d("nightmare","响应Icon信息");
+                handleIcon(socket, context, data.replace("getIconData ", ""));
+            } else if (data.startsWith("getAppInfo")) {
+                System.out.println("响应AppInfo");
+                System.out.flush();
+                handleAppInfo(socket, context, data.replace("getAppInfo ", ""));
             }
             socket.close();
         }
     }
+
+    public static void handleIcon(Socket socket, Context context, String packageName) throws IOException {
+        System.out.println("包名:"+packageName);
+        AppInfo appInfo = new AppInfo(context);
+        Bitmap bitmap = appInfo.getBitmap(packageName);
+        if (bitmap != null) {
+            socket.getOutputStream().write(Bitmap2Bytes(bitmap));
+        }
+    }
+
+    public static void handleAppInfo(Socket socket, Context context, String data) throws IOException {
+        List<String> id = stringToList(data);
+        StringBuilder builder = new StringBuilder();
+        for (String packageName : id) {
+            try {
+                PackageInfo packages = context.getPackageManager().getPackageInfo(packageName, 0);
+                builder.append(packages.applicationInfo.loadLabel(context.getPackageManager()));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    builder.append(" ").append(packages.applicationInfo.minSdkVersion);
+                } else {
+                    builder.append(" ").append("null");
+                }
+                builder.append(" ").append(packages.applicationInfo.targetSdkVersion);
+                builder.append(" ").append(packages.versionName);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    builder.append(" ").append(packages.getLongVersionCode()).append("\n");
+                } else {
+                    builder.append(" ").append(packages.versionCode).append("\n");
+                }
+
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        socket.getOutputStream().write(builder.toString().getBytes());
+    }
+
+
 
     private static List<String> stringToList(String strs) {
         String[] str = strs.split(" ");
         return Arrays.asList(str);
     }
 
-    public static void startAppInfoServer(Context context) throws IOException {
-        @SuppressLint("PrivateApi")
-        ServerSocket serverSocket = new ServerSocket(4042);
-        while (true) {
-//        Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
-//        Constructor<?> activityThreadConstructor = activityThreadClass.getDeclaredConstructor();
-//        activityThreadConstructor.setAccessible(true);
-//        Object activityThread = activityThreadConstructor.newInstance();
-//            Log.e("socket启动", "socket启动");
-            Socket socket = serverSocket.accept();
-
-            InputStream is = socket.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            OutputStream os = socket.getOutputStream();
-            List<String> id = stringToList(br.readLine());
-            StringBuilder builder = new StringBuilder();
-            for (String packageName : id) {
-                try {
-                    PackageInfo packages = context.getPackageManager().getPackageInfo(packageName, 0);
-                    builder.append(packages.applicationInfo.loadLabel(context.getPackageManager()));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        builder.append(" ").append(packages.applicationInfo.minSdkVersion);
-                    }else{
-                        builder.append(" ").append("null");
-                    }
-                    builder.append(" ").append(packages.applicationInfo.targetSdkVersion);
-                    builder.append(" ").append(packages.versionName);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        builder.append(" ").append(packages.getLongVersionCode()).append("\n");
-                    } else {
-                        builder.append(" ").append(packages.versionCode).append("\n");
-                    }
-
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-            os.write(builder.toString().getBytes());
-            socket.close();
-        }
-    }
 
     public synchronized Bitmap getBitmap(String packname) {
         ApplicationInfo applicationInfo = null;
@@ -177,37 +167,4 @@ public class AppInfo {
         }
     }
 
-
-    /*
-     * 获取程序的权限
-     */
-    public String[] getAppPremission(String packname) {
-        try {
-            PackageInfo packinfo = pm.getPackageInfo(packname, PackageManager.GET_PERMISSIONS);
-            //获取到所有的权限
-            return packinfo.requestedPermissions;
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-
-        }
-        return null;
-    }
-
-
-    /*
-     * 获取程序的签名
-     */
-    public String getAppSignature(String packname) {
-        try {
-            PackageInfo packinfo = pm.getPackageInfo(packname, PackageManager.GET_SIGNATURES);
-            //获取到所有的权限
-            return packinfo.signatures[0].toCharsString();
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-
-        }
-        return null;
-    }
 }

@@ -11,13 +11,11 @@ const MethodChannel _channel = MethodChannel('GetAppIcon');
 
 class AppUtils {
   static Future<List<String>> getAppInfo(List<String> packages) async {
-    SocketWrapper manager = SocketWrapper(
-      InternetAddress.anyIPv4,
-      4042,
-    );
-    Log.w('等待连接');
+    SocketWrapper manager = SocketWrapper(InternetAddress.anyIPv4, 4041);
+    // Log.w('等待连接');
     await manager.connect();
-    manager.sendMsg(packages.join(' ') + '\n');
+    // Log.w('连接成功');
+    manager.sendMsg('getAppInfo ' + packages.join(' ') + '\n');
     final List<String> infos = (await manager.getString()).split('\n');
     infos.removeLast();
     return infos;
@@ -25,12 +23,9 @@ class AppUtils {
 
   static Future<List<int>> getAppIconBytes(String packageName) async {
     // return _channel.invokeMethod<List<int>>(packageName);
-    SocketWrapper manager = SocketWrapper(
-      InternetAddress.anyIPv4,
-      4041,
-    );
+    SocketWrapper manager = SocketWrapper(InternetAddress.anyIPv4, 4041);
     await manager.connect();
-    manager.sendMsg('$packageName\n');
+    manager.sendMsg('getIconData ' '$packageName\n');
     // List<int> result = await manager.mStream.;
     return await manager.getResult();
   }
@@ -49,5 +44,9 @@ class AppUtils {
 
   static Future<void> freezeApp(String packageName) async {
     Log.w(await Global().exec('pm disable $packageName'));
+  }
+
+  static Future<void> unFreezeApp(String packageName) async {
+    Log.w(await Global().exec('pm enable $packageName'));
   }
 }

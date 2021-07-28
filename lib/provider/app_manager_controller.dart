@@ -20,15 +20,17 @@ class AppManagerController extends GetxController {
   Future<void> getUserApp() async {
     //拿到应用软件List
     final List<AppEntity> entitys = <AppEntity>[];
-    String result = await Global().process.exec('pm list package -3 -e -f -U');
+    String result = await Global().exec('pm list package -3 -e -f -U');
     result = result.replaceAll(RegExp('package:'), '');
     final List<String> resultList = result.split('\n');
-
-    String disableApp =
-        await Global().process.exec('pm list package -3 -d -f -U');
+    String disableApp = await Global().exec('pm list package -3 -d -f -U');
+    Log.e("disableApp -> $disableApp");
     disableApp = disableApp.replaceAll(RegExp('package:'), '');
-    final List<String> disableAppList = disableApp.split('\n');
-    Log.e(disableApp);
+    final List<String> disableAppList = [];
+    if(disableApp.isNotEmpty){
+      // 有可能一个冻结的应用都没有
+      disableAppList.addAll(disableApp.split('\n'));
+    }
     final List<String> packages = [];
     for (int i = 0; i < resultList.length; i++) {
       String uid = resultList[i].replaceAll(RegExp('.*uid:'), '');
@@ -37,7 +39,7 @@ class AppManagerController extends GetxController {
         RegExp('.*=| uid:$uid'),
         '',
       );
-      String apkPath = resultList[i].replaceAll('=$packageName', '');
+      String apkPath = resultList[i].replaceAll('=$packageName uid:$uid', '');
       packages.add(packageName);
       // Log.w('包名 -> $packageName apkPath -> $apkPath');
       entitys.add(AppEntity(packageName, '', apkPath: apkPath, uid: uid));
@@ -60,6 +62,10 @@ class AppManagerController extends GetxController {
       ));
     }
     final List<String> infos = await AppUtils.getAppInfo(packages);
+    if(infos.isEmpty){
+      return ;
+    }
+    Log.e('infos -> $infos');
     for (int i = 0; i < infos.length; i++) {
       List<String> infoList = infos[i].split(' ');
       entitys[i].appName = infoList[0];
@@ -73,6 +79,8 @@ class AppManagerController extends GetxController {
     // saveImg(yylist);
     // Log.e(await Global().process.exec('pm list package -3 -f'));
     _userApps = entitys;
+    cacheUserIcons();
+    Log.w('_userApps length -> ${_userApps.length}');
     update();
   }
 
@@ -103,7 +111,7 @@ class AppManagerController extends GetxController {
     final List<AppEntity> entitys = <AppEntity>[];
 
     final List<String> resultList =
-        (await Global().process.exec('pm list package -s -f -U'))
+        (await Global().exec('pm list package -s -f -U'))
             .replaceAll(RegExp('package:'), '')
             .split('\n');
     // print(resultList);
@@ -115,7 +123,7 @@ class AppManagerController extends GetxController {
         RegExp('.*=| uid:$uid'),
         '',
       );
-      String apkPath = resultList[i].replaceAll('=$packageName', '');
+      String apkPath = resultList[i].replaceAll('=$packageName uid:$uid', '');
       packages.add(packageName);
       // Log.w('包名 -> $packageName apkPath -> $apkPath');
       entitys.add(AppEntity(packageName, '', apkPath: apkPath, uid: uid));
@@ -135,6 +143,7 @@ class AppManagerController extends GetxController {
     // saveImg(yylist);
     // Log.e(await Global().process.exec('pm list package -3 -f'));
     _sysApps = entitys;
+    cacheSysIcons();
     update();
   }
 }

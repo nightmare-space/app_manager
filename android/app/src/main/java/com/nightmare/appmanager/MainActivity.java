@@ -50,14 +50,7 @@ public class MainActivity extends FlutterActivity {
 
         new Thread(() -> {
             try {
-                AppInfo.startIconServer(getApplicationContext());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-        new Thread(() -> {
-            try {
-                AppInfo.startAppInfoServer(getApplicationContext());
+                AppInfo.startServer(getApplicationContext());
             } catch (Exception e) {
                 e.printStackTrace();
             }

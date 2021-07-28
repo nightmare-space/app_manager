@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_manager/global/global.dart';
 import 'package:app_manager/model/app.dart';
+import 'package:app_manager/provider/app_manager_controller.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/utils/app_utils.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
@@ -31,7 +32,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: AppColors.accentColor.withOpacity(0.1),
+        backgroundColor: Color(0xfff0f0f0).withOpacity(0.1),
         body: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
@@ -313,8 +314,25 @@ class _AppSettingPageState extends State<AppSettingPage> {
                           }),
                           buildItem('清除App数据', danger: true),
                           buildItem('卸载', danger: true),
-                          buildItem('冻结', danger: true, onTap: () {
-                            AppUtils.freezeApp(entity.packageName);
+                          Builder(builder: (_) {
+                            if (entity.freeze) {
+                              return buildItem('解冻', danger: true,
+                                  onTap: () async {
+                                await AppUtils.unFreezeApp(entity.packageName);
+                                entity.freeze = false;
+                                setState(() {});
+                                AppManagerController controller = Get.find();
+                                controller.update();
+                              });
+                            }
+                            return buildItem('冻结', danger: true,
+                                onTap: () async {
+                              await AppUtils.freezeApp(entity.packageName);
+                              entity.freeze = true;
+                              setState(() {});
+                                AppManagerController controller = Get.find();
+                                controller.update();
+                            });
                           }),
                           buildItem('隐藏', danger: true, onTap: () {
                             AppUtils.hideApp(entity.packageName);

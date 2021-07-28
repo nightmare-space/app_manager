@@ -14,7 +14,7 @@ class AppEntity {
   String minSdk = '';
   String versionName = '';
   String versionCode = '';
-  final bool freeze;
+   bool freeze;
   final String uid;
   @override
   String toString() {

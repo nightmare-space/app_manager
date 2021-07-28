@@ -16,9 +16,10 @@ class AppManager extends StatefulWidget {
   AppManager({Key key, this.process}) : super(key: key) {
     if (process != null) {
       Global().process = process;
+      // 放这儿是对的
+      Global().initProcess();
     }
     Get.put(AppManagerController());
-    Global().initProcess();
   }
   final Executable process;
   @override
@@ -57,12 +58,12 @@ class _AppManagerState extends State<AppManager>
   }
 
   Future<void> init() async {
-    final Directory workDir = Directory(RuntimeEnvir.filesPath + '/AppManager');
-    final bool exists = workDir.existsSync();
-    if (!exists) {
-      await workDir.create(recursive: true);
-    }
-    await Directory(workDir.path + '/.icon').create();
+    // final Directory workDir = Directory(RuntimeEnvir.filesPath + '/AppManager');
+    // final bool exists = workDir.existsSync();
+    // if (!exists) {
+    //   await workDir.create(recursive: true);
+    // }
+    // await Directory(workDir.path + '/.icon').create();
     appManagerProvider.getUserApp();
     appManagerProvider.getSysApp();
   }
