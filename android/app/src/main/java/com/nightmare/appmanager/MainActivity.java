@@ -33,6 +33,8 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
+import static com.nightmare.appmanager.AppInfo.Bitmap2Bytes;
+
 public class MainActivity extends FlutterActivity {
 
 
@@ -62,6 +64,7 @@ public class MainActivity extends FlutterActivity {
 
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "jump").setMethodCallHandler((call, result) -> {
             new Thread(() -> {
+                // try catch 一下
                 List<String> arg = stringToList(call.method);
                 Intent intent = new Intent();
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -79,35 +82,54 @@ public class MainActivity extends FlutterActivity {
     }
 
     void App(@NonNull FlutterEngine flutterEngine) {
-
-        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "GetAppInfo").setMethodCallHandler((call, result) -> new Thread(() -> {
-            try {
-                PackageInfo packages = getPackageManager().getPackageInfo(call.method, 0);
-                ActivityInfo[] actInfo = getPackageManager().getPackageInfo(packages.packageName, PackageManager.GET_ACTIVITIES).activities;
-                StringBuilder builder = new StringBuilder();
+        MethodChannel appChannel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "app_manager");
+        appChannel.setMethodCallHandler((call, result) -> new Thread(() -> {
+            switch (call.method) {
+                case "getAppIcon":
+                    String packageName = (String) call.arguments;
+                    AppInfo iconInfo = new AppInfo(this);
+                    byte[] bytes = iconInfo.getBitmapBytes(packageName);
+                    if (bytes.length != 0) {
+                        runOnUiThread(() -> {
+                            result.success(bytes);
+                        });
+                    }
+                    break;
+                case "getAppInfo":
+                    AppInfo appInfo = new AppInfo(this);
+                    String res = (String) call.arguments;
+                    runOnUiThread(() -> {
+                        result.success(appInfo.getAppInfo(res));
+                    });
+                    break;
+                case "getMainActivity":
+                    try {
+                        PackageInfo packages = getPackageManager().getPackageInfo(call.method, 0);
+                        ActivityInfo[] actInfo = getPackageManager().getPackageInfo(packages.packageName, PackageManager.GET_ACTIVITIES).activities;
+                        StringBuilder builder = new StringBuilder();
 //                if(actInfo!=null)
 //                for (ActivityInfo a : actInfo) {
 //                    list.append(a.name).append("\n");
 //                }
-                Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-                mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-                @SuppressLint("QueryPermissionsNeeded")
-                List<ResolveInfo> appList = getPackageManager().queryIntentActivities(mainIntent, 0);
-                for (int i = 0; i < appList.size(); i++) {
-                    ResolveInfo resolveInfo = appList.get(i);
-                    String packageStr = resolveInfo.activityInfo.packageName;
-                    if (packageStr.equals(call.method)) {
-                        //这个就是你想要的那个Activity
-                        builder.append(resolveInfo.activityInfo.name).append("\n");
-                        break;
+                        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+                        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                        @SuppressLint("QueryPermissionsNeeded")
+                        List<ResolveInfo> appList = getPackageManager().queryIntentActivities(mainIntent, 0);
+                        for (int i = 0; i < appList.size(); i++) {
+                            ResolveInfo resolveInfo = appList.get(i);
+                            String packageStr = resolveInfo.activityInfo.packageName;
+                            if (packageStr.equals(call.method)) {
+                                //这个就是你想要的那个Activity
+                                builder.append(resolveInfo.activityInfo.name).append("\n");
+                                break;
+                            }
+                        }
+                        runOnUiThread(() -> result.success(builder.toString()));
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
                     }
-                }
-                runOnUiThread(() -> result.success(builder.toString()));
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
+                    break;
             }
-
-
         }).start());
     }
 }
