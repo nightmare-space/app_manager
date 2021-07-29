@@ -1,7 +1,8 @@
 package com.nightmare.appmanager;
 
+
 /**
- * Created by xdj on 2017/3/7.
+ * Created by Nightmare on 2021/7/29.
  */
 
 import android.annotation.SuppressLint;
@@ -33,7 +34,8 @@ import java.util.List;
 public class AppInfo {
     Context context;
     PackageManager pm;
-    private static final int MESSAGE_MAX_SIZE = 1 << 18; // 256k
+
+    static final String SOCKET_NAME = "app_manager";
 
     public AppInfo(Context context) {
         this.context = context;
@@ -69,40 +71,62 @@ public class AppInfo {
     }
 
     public static void startServer(Context context) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(4041);
-        while(true){
+        LocalServerSocket localServerSocket = new LocalServerSocket(SOCKET_NAME);
+        while (true) {
             System.out.println("等待连接");
             System.out.flush();
-            Socket socket = serverSocket.accept();
+            LocalSocket socket = localServerSocket.accept();
             System.out.println("连接成功");
             System.out.flush();
             InputStream is = socket.getInputStream();
+            OutputStream os = socket.getOutputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String data = br.readLine();
             if (data.startsWith("getIconData")) {
                 System.out.println("响应Icon信息");
                 System.out.flush();
-                Log.d("nightmare","响应Icon信息");
-                handleIcon(socket, context, data.replace("getIconData ", ""));
+                Log.d("nightmare", "响应Icon信息");
+                handleIcon(os, context, data.replace("getIconData ", ""));
             } else if (data.startsWith("getAppInfo")) {
                 System.out.println("响应AppInfo");
                 System.out.flush();
-                handleAppInfo(socket, context, data.replace("getAppInfo ", ""));
+                handleAppInfo(os, context, data.replace("getAppInfo ", ""));
+            } else if (data.startsWith("getAllIconData")) {
+                System.out.println("响应AllAppInfo");
+                System.out.flush();
+                handleAllAppInfo(os, context, data.replace("getAllIconData ", ""));
             }
             socket.close();
         }
     }
 
-    public static void handleIcon(Socket socket, Context context, String packageName) throws IOException {
-        System.out.println("包名:"+packageName);
+    public static void handleIcon(OutputStream outputStream, Context context, String packageName) throws IOException {
+        System.out.println("包名:" + packageName);
         AppInfo appInfo = new AppInfo(context);
-        Bitmap bitmap = appInfo.getBitmap(packageName);
-        if (bitmap != null) {
-            socket.getOutputStream().write(Bitmap2Bytes(bitmap));
+
+        System.out.println("发送的第一个字节为" + appInfo.getBitmapBytes(packageName)[0]);
+        System.out.flush();
+
+        outputStream.write(appInfo.getBitmapBytes(packageName));
+    }
+
+    public static void handleAllAppInfo(OutputStream outputStream, Context context, String data) throws IOException {
+        List<String> id = stringToList(data);
+        AppInfo appInfo = new AppInfo(context);
+        System.out.println("第一个包名为" + id.get(0) + "发送的第一个字节为" + appInfo.getBitmapBytes(id.get(0))[0]);
+        System.out.flush();
+        for (String packageName : id) {
+            outputStream.write(appInfo.getBitmapBytes(packageName));
+            outputStream.flush();
         }
     }
 
-    public static void handleAppInfo(Socket socket, Context context, String data) throws IOException {
+    public static void handleAppInfo(OutputStream outputStream, Context context, String data) throws IOException {
+        AppInfo appInfo = new AppInfo(context);
+        outputStream.write(appInfo.getAppInfo(data).getBytes());
+    }
+
+    public String getAppInfo(String data) {
         List<String> id = stringToList(data);
         StringBuilder builder = new StringBuilder();
         for (String packageName : id) {
@@ -126,16 +150,18 @@ public class AppInfo {
                 e.printStackTrace();
             }
         }
-        socket.getOutputStream().write(builder.toString().getBytes());
+        return builder.toString();
+
     }
-
-
 
     private static List<String> stringToList(String strs) {
         String[] str = strs.split(" ");
         return Arrays.asList(str);
     }
 
+    public byte[] getBitmapBytes(String packname) {
+        return Bitmap2Bytes(getBitmap(packname));
+    }
 
     public synchronized Bitmap getBitmap(String packname) {
         ApplicationInfo applicationInfo = null;
