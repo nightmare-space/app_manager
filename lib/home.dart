@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app_manager/global/config.dart';
 import 'package:app_manager/utils/socket_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,10 +17,15 @@ class AppManager extends StatefulWidget {
   AppManager({Key key, this.process}) : super(key: key) {
     if (process != null) {
       Global().process = process;
+    } else {
       // 放这儿是对的
       Global().initProcess();
     }
     Get.put(AppManagerController());
+    if (RuntimeEnvir.packageName != Config.packageName) {
+      // 如果这个项目是独立运行的，那么RuntimeEnvir.packageName会在main函数中被设置成Config.packageName
+      Config.flutterPackage = 'packages/app_manager/';
+    }
   }
   final Executable process;
   @override
@@ -99,7 +105,7 @@ class _AppManagerState extends State<AppManager>
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
-                'assets/app.svg',
+                '${Config.flutterPackage}assets/app.svg',
                 width: 24,
               ),
               title: Text(

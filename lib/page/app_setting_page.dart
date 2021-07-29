@@ -327,11 +327,16 @@ class _AppSettingPageState extends State<AppSettingPage> {
                             }
                             return buildItem('冻结', danger: true,
                                 onTap: () async {
-                              await AppUtils.freezeApp(entity.packageName);
-                              entity.freeze = true;
-                              setState(() {});
+                              bool success =
+                                  await AppUtils.freezeApp(entity.packageName);
+                              if (success) {
+                                entity.freeze = true;
+                                setState(() {});
                                 AppManagerController controller = Get.find();
                                 controller.update();
+                              }else{
+                                showToast('禁用失败,当前root状态${await Global().process.isRoot()}');
+                              }
                             });
                           }),
                           buildItem('隐藏', danger: true, onTap: () {

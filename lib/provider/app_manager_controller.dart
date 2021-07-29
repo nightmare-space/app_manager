@@ -27,7 +27,7 @@ class AppManagerController extends GetxController {
     Log.e("disableApp -> $disableApp");
     disableApp = disableApp.replaceAll(RegExp('package:'), '');
     final List<String> disableAppList = [];
-    if(disableApp.isNotEmpty){
+    if (disableApp.isNotEmpty) {
       // 有可能一个冻结的应用都没有
       disableAppList.addAll(disableApp.split('\n'));
     }
@@ -62,8 +62,8 @@ class AppManagerController extends GetxController {
       ));
     }
     final List<String> infos = await AppUtils.getAppInfo(packages);
-    if(infos.isEmpty){
-      return ;
+    if (infos.isEmpty) {
+      return;
     }
     Log.e('infos -> $infos');
     for (int i = 0; i < infos.length; i++) {
@@ -79,9 +79,13 @@ class AppManagerController extends GetxController {
     // saveImg(yylist);
     // Log.e(await Global().process.exec('pm list package -3 -f'));
     _userApps = entitys;
-    cacheUserIcons();
-    Log.w('_userApps length -> ${_userApps.length}');
     update();
+    if (AppUtils.runOnPackage()) {
+      cacheAllUserIcons(packages);
+    } else {
+      cacheUserIcons();
+    }
+    Log.w('_userApps length -> ${_userApps.length}');
   }
 
   Future<void> cacheUserIcons() async {
@@ -92,6 +96,44 @@ class AppManagerController extends GetxController {
           entity.packageName,
           await AppUtils.getAppIconBytes(entity.packageName),
         );
+      }
+    }
+  }
+
+  Future<void> cacheAllUserIcons(List<String> packages) async {
+    // 所有图
+    List<int> allBytes = await AppUtils.getAllAppIconBytes(packages);
+    // Log.e('allBytes -> $allBytes');
+    if (allBytes.isEmpty) {
+      return;
+    }
+    Log.w('缓存全部...');
+    List<List<int>> byteList = [];
+    byteList.length = packages.length;
+    int index = 0;
+    for (int i = 0; i < allBytes.length; i++) {
+      byteList[index] ??= [];
+      byteList[index].add(allBytes[i]);
+      if (i < allBytes.length - 1 - 6 &&
+          allBytes[i + 1] == 137 &&
+          allBytes[i + 2] == 80 &&
+          allBytes[i + 3] == 78 &&
+          allBytes[i + 4] == 71 &&
+          allBytes[i + 5] == 13 &&
+          allBytes[i + 6] == 10 &&
+          i != 0) {
+        index++;
+        Log.w('缓存第$index个包名的');
+      }
+    }
+    for (int i = 0; i < packages.length; i++) {
+      IconStore().cache(packages[i], byteList[i]);
+      if (packages[i] == 'com.taxis99') {
+        final filePath = RuntimeEnvir.binPath + '/placeholder.png';
+        final File file = File(filePath);
+        if (!await file.exists()) {
+          await file.writeAsBytes(byteList[i]);
+        }
       }
     }
   }
@@ -143,7 +185,7 @@ class AppManagerController extends GetxController {
     // saveImg(yylist);
     // Log.e(await Global().process.exec('pm list package -3 -f'));
     _sysApps = entitys;
-    cacheSysIcons();
+    // cacheSysIcons();
     update();
   }
 }

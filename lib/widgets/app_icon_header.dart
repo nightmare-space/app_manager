@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:app_manager/global/config.dart';
 import 'package:app_manager/global/icon_store.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/utils/app_utils.dart';
@@ -63,11 +64,15 @@ class _AppIconHeaderState extends State<AppIconHeader> {
       );
     } else {
       return SizedBox(
+        width: 54,
+        height: 54,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.memory(
-            Uint8List.fromList(_bytes),
-            gaplessPlayback: true,
+          child: FadeInImage(
+            placeholder:
+                AssetImage('${Config.flutterPackage}assets/placeholder.png'),
+            image: MemoryImage(Uint8List.fromList(_bytes)),
+            fadeInDuration: Duration(milliseconds: 10),
           ),
         ),
       );
