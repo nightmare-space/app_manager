@@ -1,18 +1,23 @@
 import 'package:app_manager/global/global.dart';
 import 'package:app_manager/model/app.dart';
+import 'package:app_manager/controller/app_manager_controller.dart';
+import 'package:app_manager/controller/check_controller.dart';
+import 'package:app_manager/theme/app_colors.dart';
+import 'package:app_manager/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 
 class LongPress extends StatefulWidget {
-  const LongPress({Key key, this.apps}) : super(key: key);
-  final List<AppEntity> apps;
+  const LongPress({Key key}) : super(key: key);
 
   @override
   _LongPressState createState() => _LongPressState();
 }
 
 class _LongPressState extends State<LongPress> {
+  CheckController controller = Get.find();
   Widget item(String title, void Function() onTap) {
     return Material(
       color: Colors.white,
@@ -20,12 +25,18 @@ class _LongPressState extends State<LongPress> {
         onTap: onTap,
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
-          height: 48.0,
+          height: 52.0,
           child: Align(
             alignment: Alignment.centerLeft,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(title),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: AppColors.fontColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ),
@@ -35,31 +46,60 @@ class _LongPressState extends State<LongPress> {
 
   @override
   Widget build(BuildContext context) {
-    return FullHeightListView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Center(
-            child: Text(widget.apps[0].appName),
-          ),
-          item('打开', () async {
-            const MethodChannel getAppIcon = MethodChannel('GetAppInfo');
-            final String activityName = await getAppIcon
-                .invokeMethod<String>(widget.apps[0].packageName);
-            await Global().process.exec(
-                'am start -n ${widget.apps[0].packageName}/$activityName');
-            // String result = await CustomProcess.exec(
-            //     "pm dump ${widget.apps[0].packageName}");
-            // File("$documentsDir/YanTool/日志文件夹/a.txt")
-            //     .writeAsStringSync(result);
-            // print(result);
-          }),
-          item('清除数据', () {}),
-          item('卸载', () {}),
-          item('冻结', () {}),
-          item('打开', () {}),
-          item('导出', () {}),
-        ],
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(12),
+        topRight: Radius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Center(
+              child: Text(
+                '选择了${controller.check.length}个应用',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            item('清除数据', () {}),
+            item('卸载', () {}),
+            item('冻结', () async {
+              Get.back();
+              AppManagerController managerController = Get.find();
+              for (AppEntity entity in controller.check) {
+                bool success = await AppUtils.freezeApp(entity.packageName);
+                if (success) {
+                  entity.freeze = true;
+                  managerController.update();
+                  // managerController.removeEntityByPackage(entity);
+                }
+              }
+              controller.clearCheck();
+            }),
+            item('解冻', () async {
+              Get.back();
+              AppManagerController managerController = Get.find();
+              for (AppEntity entity in controller.check) {
+                bool success = await AppUtils.unFreezeApp(entity.packageName);
+                if (success) {
+                  entity.freeze = false;
+                  managerController.update();
+                  // managerController.removeEntityByPackage(entity);
+                }
+              }
+              controller.clearCheck();
+            }),
+            item('打开', () {}),
+            item('导出', () {}),
+          ],
+        ),
       ),
     );
   }

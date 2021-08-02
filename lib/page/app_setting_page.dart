@@ -1,20 +1,27 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_manager/global/global.dart';
 import 'package:app_manager/model/app.dart';
-import 'package:app_manager/provider/app_manager_controller.dart';
+import 'package:app_manager/controller/app_manager_controller.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/utils/app_utils.dart';
+import 'package:app_manager/utils/route_extension.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:app_manager/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
+import 'package:path/path.dart';
+import 'package:shortcut/shortcut.dart';
 
 class AppSettingPage extends StatefulWidget {
-  const AppSettingPage({Key key, @required this.entity}) : super(key: key);
+  const AppSettingPage({
+    Key key,
+    @required this.entity,
+  }) : super(key: key);
   final AppEntity entity;
 
   @override
@@ -22,6 +29,26 @@ class AppSettingPage extends StatefulWidget {
 }
 
 class _AppSettingPageState extends State<AppSettingPage> {
+  List<String> activitys = [];
+  String nativeDirPath = '';
+  List<File> soLibs = [];
+  @override
+  void initState() {
+    super.initState();
+    getDetailsInfo();
+  }
+
+  Future<void> getDetailsInfo() async {
+    activitys = await AppUtils.getAppActivitys(widget.entity.packageName);
+    nativeDirPath = await AppUtils.getAppNativeDir(widget.entity.packageName);
+    Directory dir = Directory(nativeDirPath);
+    await for (FileSystemEntity entity in dir.list()) {
+      if (entity is File) {
+        soLibs.add(entity);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     AppEntity entity = widget.entity;
@@ -41,13 +68,47 @@ class _AppSettingPageState extends State<AppSettingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: NiIconButton(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Icon(Icons.arrow_back_ios_new),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      NiIconButton(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Icon(Icons.arrow_back_ios_new),
+                      ),
+                      Container(
+                        height: 48,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            push(AppInfoDetailPage(
+                              activitys: activitys,
+                              entity: entity,
+                              soLibs: soLibs,
+                            ));
+                          },
+                          onTapDown: (_) {
+                            Feedback.forLongPress(context);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Center(
+                              child: Text(
+                                '更多',
+                                style: TextStyle(
+                                  color: AppColors.fontColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Row(
@@ -55,8 +116,8 @@ class _AppSettingPageState extends State<AppSettingPage> {
                     NiCardButton(
                       borderRadius: 10,
                       child: SizedBox(
-                        width: 76,
-                        height: 76,
+                        width: 94,
+                        height: 94,
                         child: AppIconHeader(
                           packageName: widget.entity.packageName,
                         ),
@@ -86,6 +147,11 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ),
                                     Text(entity.appName),
                                     SizedBox(width: 16),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
                                     Text(
                                       'UID : ',
                                       style: TextStyle(
@@ -275,6 +341,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                   ],
                 ),
                 NiCardButton(
+                  borderRadius: 16,
                   child: Material(
                     color: Colors.transparent,
                     child: SizedBox(
@@ -287,12 +354,10 @@ class _AppSettingPageState extends State<AppSettingPage> {
                             //       'am start -n ${widget.apps[0].packageName}/$activityName');
                             // }
 
-                            const MethodChannel jump = MethodChannel('jump');
-                            jump.invokeMethod(
-                              [
-                                entity.packageName,
-                                AppUtils.getAppMainActivity(entity.packageName),
-                              ].join('\n'),
+                            AppUtils.launchActivity(
+                              entity.packageName,
+                              await AppUtils.getAppMainActivity(
+                                  entity.packageName),
                             );
                             // Log.w('activityName -> $activityName');
                             // final AndroidIntent intent = AndroidIntent(
@@ -312,11 +377,19 @@ class _AppSettingPageState extends State<AppSettingPage> {
                             );
                             intent.launch();
                           }),
-                          buildItem('清除App数据', danger: true),
-                          buildItem('卸载', danger: true),
+                          buildItem('清除App数据', danger: true, onTap: () {
+                            AppUtils.clearAppData(entity.packageName);
+                          }),
+                          buildItem('卸载', danger: true, onTap: () async {
+                            await AppUtils.unInstallApp(entity.packageName);
+
+                            AppManagerController controller = Get.find();
+                            controller.removeEntity(entity);
+                            controller.update();
+                          }),
                           Builder(builder: (_) {
                             if (entity.freeze) {
-                              return buildItem('解冻', danger: true,
+                              return buildItem('解冻', danger: false,
                                   onTap: () async {
                                 await AppUtils.unFreezeApp(entity.packageName);
                                 entity.freeze = false;
@@ -334,13 +407,43 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                 setState(() {});
                                 AppManagerController controller = Get.find();
                                 controller.update();
-                              }else{
-                                showToast('禁用失败,当前root状态${await Global().process.isRoot()}');
+                              } else {
+                                showToast(
+                                    '禁用失败,当前root状态${await Global().process.isRoot()}');
                               }
                             });
                           }),
-                          buildItem('隐藏', danger: true, onTap: () {
-                            AppUtils.hideApp(entity.packageName);
+                          Builder(builder: (_) {
+                            if (entity.hide) {
+                              return buildItem('显示', danger: false,
+                                  onTap: () async {
+                                bool success =
+                                    await AppUtils.showApp(entity.packageName);
+                                if (success) {
+                                  entity.hide = false;
+                                  setState(() {});
+                                  AppManagerController controller = Get.find();
+                                  controller.update();
+                                } else {
+                                  showToast(
+                                      '显示失败,当前root状态${await Global().process.isRoot()}');
+                                }
+                              });
+                            }
+                            return buildItem('隐藏', danger: true,
+                                onTap: () async {
+                              bool success =
+                                  await AppUtils.hideApp(entity.packageName);
+                              if (success) {
+                                entity.hide = true;
+                                setState(() {});
+                                AppManagerController controller = Get.find();
+                                controller.update();
+                              } else {
+                                showToast(
+                                    '隐藏失败,当前root状态${await Global().process.isRoot()}');
+                              }
+                            });
                           }),
                         ],
                       ),
@@ -376,6 +479,191 @@ class _AppSettingPageState extends State<AppSettingPage> {
                 color: danger ? Colors.red : AppColors.fontColor,
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AppInfoDetailPage extends StatefulWidget {
+  const AppInfoDetailPage({
+    key,
+    this.activitys,
+    this.entity,
+    this.soLibs,
+  }) : super(key: key);
+  final List<String> activitys;
+  final AppEntity entity;
+  final List<File> soLibs;
+
+  @override
+  _AppInfoDetailPageState createState() => _AppInfoDetailPageState();
+}
+
+class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              NiCardButton(
+                borderRadius: 20,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.indigo.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          '活动列表',
+                          style: TextStyle(
+                            color: Colors.indigo,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Builder(builder: (_) {
+                        List<Widget> children = [];
+                        for (String activity in widget.activitys) {
+                          children.add(Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {
+                                AppUtils.launchActivity(
+                                  widget.entity.packageName,
+                                  activity,
+                                );
+                                Shortcut.addShortcut(
+                                  assetName: 'assets/placeholder.png',
+                                  name: activity.split('.').last,
+                                  packageName: widget.entity.packageName,
+                                  activityName: activity,
+                                  intentExtra: {},
+                                );
+                              },
+                              child: SizedBox(
+                                height: 48,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      activity,
+                                      style: TextStyle(
+                                        color: AppColors.fontColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ));
+                        }
+                        return Column(
+                          children: children,
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+              NiCardButton(
+                borderRadius: 20,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.indigo.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          'So库',
+                          style: TextStyle(
+                            color: Colors.indigo,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Builder(builder: (_) {
+                        List<Widget> children = [];
+                        for (File entity in widget.soLibs) {
+                          children.add(Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {},
+                              child: SizedBox(
+                                height: 48,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          basename(entity.path),
+                                          style: TextStyle(
+                                            color: AppColors.fontColor,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        Text(
+                                          '(${FileSizeUtils.getFileSize(entity.lengthSync())})',
+                                          style: TextStyle(
+                                            color: AppColors.fontColor
+                                                .withOpacity(0.6),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ));
+                        }
+
+                        return Column(
+                          children: children,
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

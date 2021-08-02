@@ -21,6 +21,7 @@ class AppIconHeader extends StatefulWidget {
 class _AppIconHeaderState extends State<AppIconHeader> {
   bool imgExist = false;
   List<int> _bytes = [];
+  bool prepare = false;
   @override
   void initState() {
     super.initState();
@@ -39,13 +40,21 @@ class _AppIconHeaderState extends State<AppIconHeader> {
   //   }
   // }
   Future<void> loadAppIcon() async {
-    if ((_bytes = IconStore().loadCache(widget.packageName)).isEmpty) {
-      _bytes = IconStore().cache(
-        widget.packageName,
+    // if ((_bytes = IconStore().loadCache(widget.packageName)).isEmpty) {
+    File cacheFile = File(
+        RuntimeEnvir.filesPath + '/AppManager/.icon/${widget.packageName}');
+    if (!await cacheFile.exists()) {
+      await cacheFile.writeAsBytes(
         await AppUtils.getAppIconBytes(widget.packageName),
       );
-      // Log.w('loadAppIcon $_bytes');
     }
+    // _bytes = IconStore().cache(
+    //   widget.packageName,
+    //   await AppUtils.getAppIconBytes(widget.packageName),
+    // );
+    // Log.w('loadAppIcon $_bytes');
+    // }
+    prepare = true;
     if (mounted) {
       setState(() {});
     }
@@ -53,7 +62,7 @@ class _AppIconHeaderState extends State<AppIconHeader> {
 
   @override
   Widget build(BuildContext context) {
-    if (_bytes.isEmpty) {
+    if (!prepare) {
       return SizedBox(
         width: 54,
         height: 54,
@@ -68,11 +77,10 @@ class _AppIconHeaderState extends State<AppIconHeader> {
         height: 54,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: FadeInImage(
-            placeholder:
-                AssetImage('${Config.flutterPackage}assets/placeholder.png'),
-            image: MemoryImage(Uint8List.fromList(_bytes)),
-            fadeInDuration: Duration(milliseconds: 10),
+          child: Image.file(
+            File(RuntimeEnvir.filesPath +
+                '/AppManager/.icon/${widget.packageName}'),
+            gaplessPlayback: true,
           ),
         ),
       );

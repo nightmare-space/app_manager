@@ -13,6 +13,9 @@ class NiIconButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
+        onTapDown: (_) {
+          Feedback.forLongPress(context);
+        },
         child: Padding(
           padding: EdgeInsets.all(12),
           child: child,

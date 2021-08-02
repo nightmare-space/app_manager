@@ -65,12 +65,16 @@ public class MainActivity extends FlutterActivity {
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "jump").setMethodCallHandler((call, result) -> {
             new Thread(() -> {
                 // try catch 一下
-                List<String> arg = stringToList(call.method);
-                Intent intent = new Intent();
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                ComponentName cName = new ComponentName(arg.get(0), arg.get(1));
-                intent.setComponent(cName);
-                startActivity(intent);
+               try {
+                   List<String> arg = stringToList(call.method);
+                   Intent intent = new Intent();
+                   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                   ComponentName cName = new ComponentName(arg.get(0), arg.get(1));
+                   intent.setComponent(cName);
+                   startActivity(intent);
+               }catch (Exception e){
+                   e.printStackTrace();
+               }
             }).start();
         });
     }
@@ -96,16 +100,48 @@ public class MainActivity extends FlutterActivity {
                     }
                     break;
                 case "getAppInfo":
-                    AppInfo appInfo = new AppInfo(this);
-                    String res = (String) call.arguments;
-                    runOnUiThread(() -> {
-                        result.success(appInfo.getAppInfo(res));
-                    });
+                    new Thread(() -> {
+                        AppInfo appInfo = new AppInfo(this);
+                        String res = (String) call.arguments;
+                        FileOutputStream fop = null;
+                        File file;
+                        String content = appInfo.getAllAppInfo(res);
+
+                        try {
+
+                            file = new File(this.getFilesDir().getPath()+"/app_info");
+                            fop = new FileOutputStream(file);
+
+                            // if file doesnt exists, then create it
+                            if (!file.exists()) {
+                                file.createNewFile();
+                            }
+                            // get the content in bytes
+                            byte[] contentInBytes = content.getBytes();
+                            fop.write(contentInBytes);
+                            fop.flush();
+                            fop.close();
+                            System.out.println("Done");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            try {
+                                if (fop != null) {
+                                    fop.close();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        runOnUiThread(() -> {
+                            result.success(null);
+                        });
+                    }).start();
                     break;
                 case "getMainActivity":
                     try {
-                        PackageInfo packages = getPackageManager().getPackageInfo(call.method, 0);
-                        ActivityInfo[] actInfo = getPackageManager().getPackageInfo(packages.packageName, PackageManager.GET_ACTIVITIES).activities;
+                        PackageInfo packages = getPackageManager().getPackageInfo((String) call.arguments, 0);
                         StringBuilder builder = new StringBuilder();
 //                if(actInfo!=null)
 //                for (ActivityInfo a : actInfo) {
@@ -118,7 +154,7 @@ public class MainActivity extends FlutterActivity {
                         for (int i = 0; i < appList.size(); i++) {
                             ResolveInfo resolveInfo = appList.get(i);
                             String packageStr = resolveInfo.activityInfo.packageName;
-                            if (packageStr.equals(call.method)) {
+                            if (packageStr.equals((String) call.arguments)) {
                                 //这个就是你想要的那个Activity
                                 builder.append(resolveInfo.activityInfo.name).append("\n");
                                 break;

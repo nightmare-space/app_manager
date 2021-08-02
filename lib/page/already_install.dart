@@ -1,5 +1,5 @@
 import 'package:app_manager/model/app.dart';
-import 'package:app_manager/provider/app_manager_controller.dart';
+import 'package:app_manager/controller/app_manager_controller.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:flutter/material.dart';

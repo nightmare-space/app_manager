@@ -1,11 +1,5 @@
 package com.nightmare.appmanager;
 
-
-/**
- * Created by Nightmare on 2021/7/29.
- */
-
-import android.annotation.SuppressLint;
 import android.content.*;
 import android.content.pm.*;
 import android.graphics.Bitmap;
@@ -25,11 +19,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
+
+/**
+ * Created by Nightmare on 2021/7/29.
+ */
 
 public class AppInfo {
     Context context;
@@ -44,6 +41,9 @@ public class AppInfo {
 
 
     static public byte[] Bitmap2Bytes(Bitmap bm) {
+        if (bm == null) {
+            return new byte[0];
+        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
         return baos.toByteArray();
@@ -71,11 +71,11 @@ public class AppInfo {
     }
 
     public static void startServer(Context context) throws IOException {
-        LocalServerSocket localServerSocket = new LocalServerSocket(SOCKET_NAME);
+        ServerSocket serverSocket = new ServerSocket(6000);
         while (true) {
             System.out.println("等待连接");
             System.out.flush();
-            LocalSocket socket = localServerSocket.accept();
+            Socket socket = serverSocket.accept();
             System.out.println("连接成功");
             System.out.flush();
             InputStream is = socket.getInputStream();
@@ -87,15 +87,25 @@ public class AppInfo {
                 System.out.flush();
                 Log.d("nightmare", "响应Icon信息");
                 handleIcon(os, context, data.replace("getIconData ", ""));
-            } else if (data.startsWith("getAppInfo")) {
+            } else if (data.startsWith("getAllAppInfo")) {
                 System.out.println("响应AppInfo");
                 System.out.flush();
-                handleAppInfo(os, context, data.replace("getAppInfo ", ""));
+                handleAllAppInfo(os, context, data.replace("getAppInfo ", ""));
             } else if (data.startsWith("getAllIconData")) {
-                System.out.println("响应AllAppInfo");
+                System.out.println("响应AllAppIcon");
                 System.out.flush();
-                handleAllAppInfo(os, context, data.replace("getAllIconData ", ""));
+                handleAllAppIcon(os, context, data.replace("getAllIconData ", ""));
+            } else if (data.startsWith("getAppActivity")) {
+                System.out.println("响应getAppActivity");
+                System.out.flush();
+                handleAppActivitys(os, context, data.replace("getAppActivity ", ""));
+            } else if (data.startsWith("getLibDir")) {
+                System.out.println("响应getLibDir");
+                System.out.flush();
+                AppInfo appInfo = new AppInfo(context);
+                os.write(appInfo.getAppShareLibDir(data.replace("getLibDir ", "")).getBytes());
             }
+            socket.setReuseAddress(true);
             socket.close();
         }
     }
@@ -110,7 +120,7 @@ public class AppInfo {
         outputStream.write(appInfo.getBitmapBytes(packageName));
     }
 
-    public static void handleAllAppInfo(OutputStream outputStream, Context context, String data) throws IOException {
+    public static void handleAllAppIcon(OutputStream outputStream, Context context, String data) throws IOException {
         List<String> id = stringToList(data);
         AppInfo appInfo = new AppInfo(context);
         System.out.println("第一个包名为" + id.get(0) + "发送的第一个字节为" + appInfo.getBitmapBytes(id.get(0))[0]);
@@ -121,29 +131,62 @@ public class AppInfo {
         }
     }
 
-    public static void handleAppInfo(OutputStream outputStream, Context context, String data) throws IOException {
+    public static void handleAppActivitys(OutputStream outputStream, Context context, String data) throws IOException {
         AppInfo appInfo = new AppInfo(context);
-        outputStream.write(appInfo.getAppInfo(data).getBytes());
+        outputStream.write(appInfo.getAppActivitys(data).getBytes());
     }
 
-    public String getAppInfo(String data) {
+    public static void handleAllAppInfo(OutputStream outputStream, Context context, String data) throws IOException {
+        AppInfo appInfo = new AppInfo(context);
+        outputStream.write(appInfo.getAllAppInfo(data).getBytes());
+    }
+
+    public String getAppActivitys(String data) {
+        StringBuilder builder = new StringBuilder();
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(data, PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_ACTIVITIES);
+            Log.w("nightmare", Arrays.toString(packageInfo.activities));
+            for (ActivityInfo info : packageInfo.activities) {
+                builder.append(info.name).append("\n");
+            }
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
+
+    }
+
+    public String getAppShareLibDir(String data) {
+        StringBuilder builder = new StringBuilder();
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(data, PackageManager.GET_UNINSTALLED_PACKAGES);
+            builder.append(packageInfo.applicationInfo.nativeLibraryDir);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
+    }
+
+    public String getAllAppInfo(String data) {
         List<String> id = stringToList(data);
         StringBuilder builder = new StringBuilder();
         for (String packageName : id) {
             try {
-                PackageInfo packages = context.getPackageManager().getPackageInfo(packageName, 0);
+                PackageInfo packages = context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
                 builder.append(packages.applicationInfo.loadLabel(context.getPackageManager()));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    builder.append(" ").append(packages.applicationInfo.minSdkVersion);
+                    builder.append("\r").append(packages.applicationInfo.minSdkVersion);
                 } else {
-                    builder.append(" ").append("null");
+                    builder.append("\r").append("null");
                 }
-                builder.append(" ").append(packages.applicationInfo.targetSdkVersion);
-                builder.append(" ").append(packages.versionName);
+//                Log.w("nightmare", packages.applicationInfo.nativeLibraryDir);
+                builder.append("\r").append(packages.applicationInfo.targetSdkVersion);
+                builder.append("\r").append(packages.versionName);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    builder.append(" ").append(packages.getLongVersionCode()).append("\n");
+                    builder.append("\r").append(packages.getLongVersionCode()).append("\n");
                 } else {
-                    builder.append(" ").append(packages.versionCode).append("\n");
+                    builder.append("\r").append(packages.versionCode).append("\n");
                 }
 
             } catch (PackageManager.NameNotFoundException e) {
@@ -167,7 +210,7 @@ public class AppInfo {
         ApplicationInfo applicationInfo = null;
         try {
             applicationInfo = pm.getApplicationInfo(
-                    packname, 0);
+                    packname, PackageManager.GET_UNINSTALLED_PACKAGES);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
