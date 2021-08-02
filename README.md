@@ -1,6 +1,6 @@
 # 应用管理器
 Language: 中文简体 | [English](README-EN.md)
-A new Flutter project.
+
 
 ## Getting Started
 
