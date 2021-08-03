@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:app_manager/global/config.dart';
 import 'package:app_manager/utils/socket_util.dart';
+import 'package:app_manager/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -84,39 +85,50 @@ class _AppManagerState extends State<AppManager>
                   horizontal: 8,
                   vertical: 4,
                 ),
-                child: TextField(
-                  onChanged: (data) {
-                    filter = data;
-                    setState(() {});
-                  },
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  decoration: InputDecoration(
-                    fillColor: Color(0xffeeeeee),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      gapPadding: 0,
-                      borderSide: BorderSide(
-                        width: 0,
-                        color: Colors.transparent,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        onChanged: (data) {
+                          filter = data;
+                          setState(() {});
+                        },
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: InputDecoration(
+                          fillColor: Color(0xffeeeeee),
+                          hintText: '过滤',
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            gapPadding: 0,
+                            borderSide: BorderSide(
+                              width: 0,
+                              color: Colors.transparent,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            gapPadding: 0,
+                            borderSide: BorderSide(
+                              width: 0,
+                              color: Colors.transparent,
+                            ),
+                          ),
+                          filled: true,
+                        ),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      gapPadding: 0,
-                      borderSide: BorderSide(
-                        width: 0,
-                        color: Colors.transparent,
-                      ),
+                    NiIconButton(
+                      onTap: () {},
+                      child: Icon(Icons.more_vert),
                     ),
-                    filled: true,
-                  ),
+                  ],
                 ),
               ),
               Expanded(

@@ -315,7 +315,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ));
                                     showToast('Apk路径已复制');
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     'Apk路径',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -323,7 +323,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 4,
                                 ),
                                 Text(
@@ -502,170 +502,204 @@ class AppInfoDetailPage extends StatefulWidget {
 }
 
 class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
+  int page = 0;
+  PageController controller = PageController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              NiCardButton(
-                borderRadius: 20,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          '活动列表',
-                          style: TextStyle(
-                            color: Colors.indigo,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Builder(builder: (_) {
-                        List<Widget> children = [];
-                        for (String activity in widget.activitys) {
-                          children.add(Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () async {
-                                AppUtils.launchActivity(
-                                  widget.entity.packageName,
-                                  activity,
-                                );
-                                Shortcut.addShortcut(
-                                  assetName: 'assets/placeholder.png',
-                                  name: activity.split('.').last,
-                                  packageName: widget.entity.packageName,
-                                  activityName: activity,
-                                  intentExtra: {},
-                                );
-                              },
-                              child: SizedBox(
-                                height: 48,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                  ),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      activity,
-                                      style: TextStyle(
-                                        color: AppColors.fontColor,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ));
-                        }
-                        return Column(
-                          children: children,
-                        );
-                      }),
-                    ],
-                  ),
-                ),
+              DetailsTab(
+                value: page,
+                onChange: (value) {
+                  page = value;
+                  setState(() {});
+                  controller.animateToPage(
+                    page,
+                    duration: Duration(
+                      milliseconds: 200,
+                    ),
+                    curve: Curves.ease,
+                  );
+                },
               ),
-              NiCardButton(
-                borderRadius: 20,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          'So库',
-                          style: TextStyle(
-                            color: Colors.indigo,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Builder(builder: (_) {
-                        List<Widget> children = [];
-                        for (File entity in widget.soLibs) {
-                          children.add(Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () async {},
-                              child: SizedBox(
-                                height: 48,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          basename(entity.path),
-                                          style: TextStyle(
-                                            color: AppColors.fontColor,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        Text(
-                                          '(${FileSizeUtils.getFileSize(entity.lengthSync())})',
-                                          style: TextStyle(
-                                            color: AppColors.fontColor
-                                                .withOpacity(0.6),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
+              const SizedBox(
+                height: 10,
+              ),
+              Expanded(
+                child: PageView(
+                  controller: controller,
+                  children: [
+                    Text('暂无'),
+                    Builder(builder: (_) {
+                      List<Widget> children = [];
+                      for (String activity in widget.activitys) {
+                        children.add(Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () async {
+                              AppUtils.launchActivity(
+                                widget.entity.packageName,
+                                activity,
+                              );
+                              Shortcut.addShortcut(
+                                assetName: 'assets/placeholder.png',
+                                name: activity.split('.').last,
+                                packageName: widget.entity.packageName,
+                                activityName: activity,
+                                intentExtra: {},
+                              );
+                            },
+                            child: SizedBox(
+                              height: 48,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    activity,
+                                    style: TextStyle(
+                                      color: AppColors.fontColor,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ));
-                        }
-
-                        return Column(
+                          ),
+                        ));
+                      }
+                      return SingleChildScrollView(
+                        child: Column(
                           children: children,
-                        );
-                      }),
-                    ],
-                  ),
+                        ),
+                      );
+                    }),
+                    Builder(builder: (_) {
+                      List<Widget> children = [];
+                      for (File entity in widget.soLibs) {
+                        children.add(Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () async {},
+                            child: SizedBox(
+                              height: 48,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        basename(entity.path),
+                                        style: TextStyle(
+                                          color: AppColors.fontColor,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      Text(
+                                        '(${FileSizeUtils.getFileSize(entity.lengthSync())})',
+                                        style: TextStyle(
+                                          color: AppColors.fontColor
+                                              .withOpacity(0.6),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ));
+                      }
+
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: children,
+                        ),
+                      );
+                    }),
+                    Text('暂无'),
+                  ],
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+final List<String> tabs = [
+  '基础',
+  '活动列表',
+  'So库',
+  '权限',
+];
+final List<Color> colors = [
+  Colors.indigo,
+  Colors.purple,
+  Colors.teal,
+  Colors.amber,
+];
+
+class DetailsTab extends StatelessWidget {
+  const DetailsTab({
+    Key key,
+    this.value,
+    this.onChange,
+  }) : super(key: key);
+  final int value;
+  final void Function(int value) onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> children = [];
+    for (int i = 0; i < tabs.length; i++) {
+      bool isCheck = value == i;
+      children.add(
+        GestureDetector(
+          onTap: () {
+            onChange(i);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: isCheck ? colors[i] : colors[i].withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            margin: EdgeInsets.symmetric(
+              horizontal: 4,
+            ),
+            child: Text(
+              tabs[i],
+              style: TextStyle(
+                color: isCheck ? Colors.white : colors[i],
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: children,
       ),
     );
   }
