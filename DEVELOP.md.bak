@@ -48,8 +48,8 @@ Adb push apk 内的精简 dex 到安卓设备的 /data/loacl/tmp 文件夹
 **2.运行 dex**
 用 app_process 命令执行 dex，服务端运行。
 
-**3.PC 端执行 Adb forward 进行端口转发
+**3.PC 端执行 Adb forward 进行端口转发**
 
-**4.连接 Socket，获取数据。
+**4.连接 Socket，获取数据。**
 
 ## 隐藏/冻结类 App 筛选
