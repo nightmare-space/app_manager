@@ -7,8 +7,16 @@ Developed using the Flutter framework，Highly available Android application man
 - Support for multiple platforms:support Android,macOS,Windows,Linux
 - Batch processing
 - Complete application information
-- 
+- Freeze/Hide/Uninstall app
+- Start implicit intent
+- Collect the label
+- Backup/Restore apps(cannot support abb apk)
 
+## Notice！
+This manager need root permission on Android！
+It only supports some functions on devices without root！
+
+## Screenshot
 ## Get the app
 ## Developers
 ## Licence
