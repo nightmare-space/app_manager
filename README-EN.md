@@ -1,5 +1,6 @@
 # Android App Manager
 语言: English | [中文](README.md)
+
 Developed using the Flutter framework，Highly available Android application manager。
 
 ## Features
@@ -13,8 +14,9 @@ Developed using the Flutter framework，Highly available Android application man
 - Backup/Restore apps(cannot support abb apk)
 
 ## Notice！
-This manager need root permission on Android！
-It only supports some functions on devices without root！
+**This manager need root permission on Android！**
+
+**It only supports some functions on devices without root！**
 
 ## Screenshot
 ## Get the app
