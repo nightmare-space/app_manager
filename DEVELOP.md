@@ -25,19 +25,31 @@ apkLabel minSdkVersion targetSdkVersion versionName versionCode
 
 **4.getAppActivity**
 获取单个App的activity的列表。
+```sh
+// 例如
+["com.nightmare.MainActivity","com.nightmare.termare"]
+```
 
 **5.getAppDetail**
 ```sh
+// 返回下列信息拼接的字符串
 应用安装时间 最近更新时间 Apk大小 ApkMd5 ApkSha1 ApkSha256 私有文件路径 lib路径
 ```
 ## PC端信息获取
 pm 命令不支持详细信息，图标的获取，所以还是通过套接字收发消息的机制，
 App 运行在安卓上时，会有套接字的服务端，而运行在 PC 平台的时候，我们
 又如何运行这个套接字服务端呢？
+
 分以下几步:
+
 **1.Adb push dex**
 Adb push apk 内的精简 dex 到安卓设备的 /data/loacl/tmp 文件夹
+
 **2.运行 dex**
 用 app_process 命令执行 dex，服务端运行。
+
 **3.PC 端执行 Adb forward 进行端口转发
+
 **4.连接 Socket，获取数据。
+
+## 隐藏/冻结类 App 筛选
