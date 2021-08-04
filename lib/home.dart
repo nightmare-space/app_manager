@@ -94,7 +94,7 @@ class _AppManagerState extends State<AppManager>
                         ),
                         decoration: InputDecoration(
                           fillColor: const Color(0xffeeeeee),
-                          hintText: '过滤',
+                          hintText: '搜索',
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -139,8 +139,8 @@ class _AppManagerState extends State<AppManager>
                         appList: ctl.sysApps,
                         filter: filter.toLowerCase(),
                       ),
-                      const CommonAppPage(),
-                      const CommonAppPage(),
+                      Text('暂无'),
+                      Text('暂无'),
                     ][_currentIndex],
                   );
                 }),
@@ -167,21 +167,32 @@ class _AppManagerState extends State<AppManager>
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
-                '${Config.flutterPackage}assets/safe.svg',
+                '${Config.flutterPackage}assets/market1.svg',
                 width: 24,
               ),
-              label: '已冻结',
+              label: '收藏',
+            ),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                '${Config.flutterPackage}assets/backup2.svg',
+                width: 24,
+              ),
+              label: '备份',
             ),
           ],
           unselectedItemColor: Colors.grey,
           selectedItemColor: Colors.indigo,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,
           onTap: (int index) {
             _currentIndex = index;
-            setState(
-              () {},
-            );
+            setState(() {});
           },
         ),
         floatingActionButton: GetBuilder<CheckController>(builder: (_) {

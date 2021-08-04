@@ -80,30 +80,41 @@ public class AppInfo {
             OutputStream os = socket.getOutputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String data = br.readLine();
-            if (data.startsWith("getIconData")) {
-                System.out.println("响应Icon信息");
-                System.out.flush();
-                Log.d("nightmare", "响应Icon信息");
-                handleIcon(os, context, data.replace("getIconData ", ""));
-            } else if (data.startsWith("getAllAppInfo")) {
-                System.out.println("响应AppInfo");
-                System.out.flush();
-                handleAllAppInfo(os, context, data.replace("getAllAppInfo ", ""));
-            } else if (data.startsWith("getAllIconData")) {
-                System.out.println("响应AllAppIcon");
-                System.out.flush();
-                handleAllAppIcon(os, context, data.replace("getAllIconData ", ""));
-            } else if (data.startsWith("getAppActivity")) {
-                System.out.println("响应getAppActivity");
-                System.out.flush();
-
-                AppInfo appInfo = new AppInfo(context);
-                os.write(appInfo.getAppActivitys(data.replace("getAppActivity ", "")).getBytes());
-            } else if (data.startsWith("getAppDetail")) {
-                System.out.println("响应getAppDetail");
-                System.out.flush();
-                AppInfo appInfo = new AppInfo(context);
-                os.write(appInfo.getAppDetail(data.replace("getAppDetail ", "")).getBytes());
+            String type = data.replaceAll(" .*", "");
+            AppInfo appInfo = new AppInfo(context);
+            switch (type) {
+                case "getIconData":
+                    System.out.println("响应Icon信息");
+                    System.out.flush();
+                    Log.d("nightmare", "响应Icon信息");
+                    handleIcon(os, context, data.replace("getIconData ", ""));
+                    break;
+                case "getAllAppInfo":
+                    System.out.println("响应AppInfo");
+                    System.out.flush();
+                    handleAllAppInfo(os, context, data.replace("getAllAppInfo ", ""));
+                    break;
+                case "getAllIconData":
+                    System.out.println("响应AllAppIcon");
+                    System.out.flush();
+                    handleAllAppIcon(os, context, data.replace("getAllIconData ", ""));
+                    break;
+                case "getAppActivity":
+                    System.out.println("响应getAppActivity");
+                    System.out.flush();
+                    os.write(appInfo.getAppActivitys(data.replace("getAppActivity ", "")).getBytes());
+                case "getAppPermissions":
+                    System.out.println("响应getAppPermissions");
+                    System.out.flush();
+                    os.write(appInfo.getAppPermissions(data.replace("getAppPermissions ", "")).getBytes());
+                    break;
+                case "getAppDetail":
+                    System.out.println("响应getAppDetail");
+                    System.out.flush();
+                    os.write(appInfo.getAppDetail(data.replace("getAppDetail ", "")).getBytes());
+                    break;
+                default:
+                    return;
             }
             socket.setReuseAddress(true);
             socket.close();
@@ -113,18 +124,12 @@ public class AppInfo {
     public static void handleIcon(OutputStream outputStream, Context context, String packageName) throws IOException {
         System.out.println("包名:" + packageName);
         AppInfo appInfo = new AppInfo(context);
-
-        System.out.println("发送的第一个字节为" + appInfo.getBitmapBytes(packageName)[0]);
-        System.out.flush();
-
         outputStream.write(appInfo.getBitmapBytes(packageName));
     }
 
     public static void handleAllAppIcon(OutputStream outputStream, Context context, String data) throws IOException {
         List<String> id = stringToList(data);
         AppInfo appInfo = new AppInfo(context);
-        System.out.println("第一个包名为" + id.get(0) + "发送的第一个字节为" + appInfo.getBitmapBytes(id.get(0))[0]);
-        System.out.flush();
         for (String packageName : id) {
             outputStream.write(appInfo.getBitmapBytes(packageName));
             outputStream.flush();
@@ -139,15 +144,66 @@ public class AppInfo {
 
     public String getAppActivitys(String data) {
         StringBuilder builder = new StringBuilder();
+        {
+            List<PackageInfo> packages = context.getPackageManager().getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
+            for (PackageInfo pack : packages) {
+                if (pack.packageName.equals(data)) {
+                    try {
+                        PackageInfo packageInfo = context.getPackageManager().getPackageInfo(data, PackageManager.GET_ACTIVITIES);
+                        Log.w("nightmare", Arrays.toString(packageInfo.activities));
+                        if (packageInfo.activities == null) {
+                            return "";
+                        }
+                        for (ActivityInfo info : packageInfo.activities) {
+                            builder.append(info.name).append("\n");
+                        }
+
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                        return builder.toString();
+                    }
+                }
+            }
+        }
+        return builder.toString();
+
+    }
+
+    public String getAppPermissions(String data) {
+        StringBuilder builder = new StringBuilder();
         try {
-            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(data, PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_ACTIVITIES);
-            Log.w("nightmare", Arrays.toString(packageInfo.activities));
-            for (ActivityInfo info : packageInfo.activities) {
-                builder.append(info.name).append("\n");
+            PackageManager packageManager = context.getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(data, PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
+            String[] usesPermissionsArray = packageInfo.requestedPermissions;
+            for (String usesPermissionName : usesPermissionsArray) {
+
+                //得到每个权限的名字,如:android.permission.INTERNET
+                System.out.println("usesPermissionName=" + usesPermissionName);
+                builder.append(usesPermissionName);
+                //通过usesPermissionName获取该权限的详细信息
+                PermissionInfo permissionInfo = packageManager.getPermissionInfo(usesPermissionName, 0);
+
+                //获得该权限属于哪个权限组,如:网络通信
+//                PermissionGroupInfo permissionGroupInfo = packageManager.getPermissionGroupInfo(permissionInfo.group, 0);
+//                System.out.println("permissionGroup=" + permissionGroupInfo.loadLabel(packageManager).toString());
+
+                //获取该权限的标签信息,比如:完全的网络访问权限
+                String permissionLabel = permissionInfo.loadLabel(packageManager).toString();
+                System.out.println("permissionLabel=" + permissionLabel);
+
+                //获取该权限的详细描述信息,比如:允许该应用创建网络套接字和使用自定义网络协议
+                //浏览器和其他某些应用提供了向互联网发送数据的途径,因此应用无需该权限即可向互联网发送数据.
+                String permissionDescription = permissionInfo.loadDescription(packageManager).toString();
+
+                builder.append(" ").append(permissionDescription);
+                boolean isHasPermission = PackageManager.PERMISSION_GRANTED == pm.checkPermission(permissionInfo.name, data);
+                builder.append(" ").append(isHasPermission).append("\r");
+                System.out.println("permissionDescription=" + permissionDescription);
+                System.out.println("===========================================");
             }
 
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO: handle exception
         }
         return builder.toString();
 

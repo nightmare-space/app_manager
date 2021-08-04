@@ -19,6 +19,8 @@ import 'package:global_repository/global_repository.dart';
 import 'package:path/path.dart' as path;
 import 'package:shortcut/shortcut.dart';
 
+import 'backup_sheet.dart';
+
 class AppSettingPage extends StatefulWidget {
   const AppSettingPage({
     Key key,
@@ -49,8 +51,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
 
   Future<void> getDetailsInfo() async {
     AppDetails details = AppDetails();
-    details.activitys =
-        await AppUtils.getAppActivitys(widget.entity.packageName);
+    details.activitys = await AppUtils.getAppActivitys(
+      widget.entity.packageName,
+    );
     String result = await AppUtils.getAppDetails(widget.entity.packageName);
     List<String> results = result.split('\r');
     Log.w('result -> $results');
@@ -59,7 +62,6 @@ class _AppSettingPageState extends State<AppSettingPage> {
     details.dataDir = results[2];
     details.libDir = results[3];
     String ls = await Global().exec('ls ${details.libDir}');
-    details.soLibs = [];
     for (String path in ls.split('\n')) {
       details.soLibs.add(
         SoEntity(path, await getFileSize(details.libDir + '/' + path)),
@@ -76,6 +78,15 @@ class _AppSettingPageState extends State<AppSettingPage> {
     details.apkSha1 = sha1;
     details.apkSha256 = sha256;
     widget.entity.details = details;
+    List<String> pers = await AppUtils.getAppPermission(
+      widget.entity.packageName,
+    );
+    for (String line in pers) {
+      String name = line.split(' ').first;
+      String des = line.split(' ')[1];
+      String grant = line.split(' ')[2];
+      details.permission.add(PermissionEntity(name, des, grant == 'true'));
+    }
     controller.update();
   }
 
@@ -405,6 +416,10 @@ class _AppSettingPageState extends State<AppSettingPage> {
                             );
                             intent.launch();
                           }),
+                          buildItem('备份', danger: false, onTap: () {
+                            Get.bottomSheet(const BackupSheet());
+                            // AppUtils.clearAppData(entity.packageName);
+                          }),
                           buildItem('清除App数据', danger: true, onTap: () {
                             AppUtils.clearAppData(entity.packageName);
                           }),
@@ -710,7 +725,56 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                           ),
                         );
                       }),
-                      const Text('暂无'),
+                      Builder(builder: (_) {
+                        List<Widget> children = [];
+                        for (PermissionEntity entity
+                            in widget.entity.details.permission) {
+                          children.add(Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {},
+                              child: SizedBox(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 12,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          entity.name,
+                                          style: const TextStyle(
+                                            color: AppColors.fontColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          entity.description,
+                                          style: TextStyle(
+                                            color: AppColors.fontColor
+                                                .withOpacity(0.8),
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ));
+                        }
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: children,
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -762,7 +826,7 @@ final List<String> tabs = [
 ];
 final List<Color> colors = [
   Colors.indigo,
-  Colors.purple,
+  Colors.deepPurple,
   Colors.teal,
   Colors.amber,
 ];
@@ -818,7 +882,7 @@ class _DetailsTabState extends State<DetailsTab> {
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.symmetric(
-              horizontal: 12,
+              horizontal: 16,
               vertical: 8,
             ),
             margin: const EdgeInsets.symmetric(

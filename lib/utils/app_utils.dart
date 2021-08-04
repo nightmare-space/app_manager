@@ -90,6 +90,20 @@ class AppUtils {
     return infos;
   }
 
+  static Future<List<String>> getAppPermission(String package) async {
+    if (runOnPackage()) {
+      port = 6001;
+    }
+    SocketWrapper manager = SocketWrapper(InternetAddress.anyIPv4, port);
+    // Log.w('等待连接');
+    await manager.connect();
+    // Log.w('连接成功');
+    manager.sendMsg('getAppPermissions ' + package + '\n');
+    final List<String> infos = (await manager.getString()).split('\r');
+    infos.removeLast();
+    return infos;
+  }
+
   static Future<List<int>> getAppIconBytes(String packageName) async {
     if (runOnPackage()) {
       // 有意义
@@ -154,7 +168,13 @@ class AppUtils {
   }
 
   static Future<void> launchActivity(
-      String packageName, String activity) async {
+    String packageName,
+    String activity,
+  ) async {
+    if (runOnPackage()) {
+      await Global().exec('am start -n $packageName/$activity');
+      return;
+    }
     const MethodChannel jump = MethodChannel('jump');
     jump.invokeMethod(
       [

@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class AppColors {
   AppColors._();
   static const Color fontColor = Color(0xff201b1a);
@@ -14,7 +16,7 @@ class AppColors {
   // 深紫红
   // static const Color accentColor = Color(0xff480032);
   // 红，挺好看
-  static const Color accentColor = Color(0xff99154e);
+  static const Color accentColor = Colors.indigo;
   static const Color background = Color(0xfff5f5f7);
   //
   // static const Color accentColor = Color(0xffb9135d);

@@ -18,8 +18,9 @@ class AppDetails {
   String apkSha256;
   String dataDir;
   String libDir;
-  List<String> activitys;
-  List<SoEntity> soLibs;
+  List<String> activitys = [];
+  List<SoEntity> soLibs = [];
+  List<PermissionEntity> permission = [];
 }
 
 class SoEntity {
@@ -27,4 +28,11 @@ class SoEntity {
   final String size;
 
   SoEntity(this.path, this.size);
+}
+
+class PermissionEntity {
+  PermissionEntity(this.name, this.description, this.grant);
+  final String name;
+  final String description;
+  final bool grant;
 }
