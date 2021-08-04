@@ -1,20 +1,23 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_manager/global/global.dart';
 import 'package:app_manager/model/app.dart';
 import 'package:app_manager/controller/app_manager_controller.dart';
+import 'package:app_manager/model/app_details.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/utils/app_utils.dart';
 import 'package:app_manager/utils/route_extension.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:app_manager/widgets/custom_icon_button.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:shortcut/shortcut.dart';
 
 class AppSettingPage extends StatefulWidget {
@@ -29,24 +32,52 @@ class AppSettingPage extends StatefulWidget {
 }
 
 class _AppSettingPageState extends State<AppSettingPage> {
-  List<String> activitys = [];
-  String nativeDirPath = '';
-  List<File> soLibs = [];
+  AppManagerController controller = Get.find();
   @override
   void initState() {
     super.initState();
     getDetailsInfo();
   }
 
+  String getTimeStringFromTimestamp(String timestamp) {
+    return '${DateTime.fromMillisecondsSinceEpoch(int.tryParse(timestamp))}';
+    // https://www.coloros.com/rom/firmware?id=126
+  }
+
+  Future<String> getFileSize(String path) async {
+    return await Global().exec('stat -c "%s" $path');
+  }
+
   Future<void> getDetailsInfo() async {
-    activitys = await AppUtils.getAppActivitys(widget.entity.packageName);
-    nativeDirPath = await AppUtils.getAppNativeDir(widget.entity.packageName);
-    Directory dir = Directory(nativeDirPath);
-    await for (FileSystemEntity entity in dir.list()) {
-      if (entity is File) {
-        soLibs.add(entity);
-      }
+    AppDetails details = AppDetails();
+    details.activitys =
+        await AppUtils.getAppActivitys(widget.entity.packageName);
+    String result = await AppUtils.getAppDetails(widget.entity.packageName);
+    List<String> results = result.split('\r');
+    Log.w('result -> $results');
+    details.installTime = getTimeStringFromTimestamp(results[0]);
+    details.updateTime = getTimeStringFromTimestamp(results[1]);
+    details.dataDir = results[2];
+    details.libDir = results[3];
+    String ls = await Global().exec('ls ${details.libDir}');
+    details.soLibs = [];
+    for (String path in ls.split('\n')) {
+      details.soLibs.add(
+        SoEntity(path, await getFileSize(details.libDir + '/' + path)),
+      );
     }
+    details.apkSize = '';
+    String md5 = await Global().exec('md5sum ${widget.entity.apkPath}');
+    md5 = md5.replaceAll(RegExp(' .*'), '');
+    String sha1 = await Global().exec('sha1sum ${widget.entity.apkPath}');
+    sha1 = sha1.replaceAll(RegExp(' .*'), '');
+    String sha256 = await Global().exec('sha256sum ${widget.entity.apkPath}');
+    sha256 = sha256.replaceAll(RegExp(' .*'), '');
+    details.apkMd5 = md5;
+    details.apkSha1 = sha1;
+    details.apkSha256 = sha256;
+    widget.entity.details = details;
+    controller.update();
   }
 
   @override
@@ -85,9 +116,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                           borderRadius: BorderRadius.circular(12),
                           onTap: () {
                             push(AppInfoDetailPage(
-                              activitys: activitys,
-                              entity: entity,
-                              soLibs: soLibs,
+                              entity: widget.entity,
                             ));
                           },
                           onTapDown: (_) {
@@ -489,13 +518,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
 class AppInfoDetailPage extends StatefulWidget {
   const AppInfoDetailPage({
     key,
-    this.activitys,
     this.entity,
-    this.soLibs,
   }) : super(key: key);
-  final List<String> activitys;
   final AppEntity entity;
-  final List<File> soLibs;
 
   @override
   _AppInfoDetailPageState createState() => _AppInfoDetailPageState();
@@ -505,136 +530,226 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
   int page = 0;
   PageController controller = PageController();
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DetailsTab(
-                value: page,
-                onChange: (value) {
-                  page = value;
-                  setState(() {});
-                  controller.animateToPage(
-                    page,
-                    duration: Duration(
-                      milliseconds: 200,
-                    ),
-                    curve: Curves.ease,
-                  );
-                },
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                child: PageView(
+    return GetBuilder<AppManagerController>(builder: (_) {
+      if (widget.entity.details == null) {
+        return SpinKitThreeBounce(
+          color: Colors.indigo,
+          size: 24,
+        );
+      }
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DetailsTab(
+                  value: page,
                   controller: controller,
-                  children: [
-                    Text('暂无'),
-                    Builder(builder: (_) {
-                      List<Widget> children = [];
-                      for (String activity in widget.activitys) {
-                        children.add(Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {
-                              AppUtils.launchActivity(
-                                widget.entity.packageName,
-                                activity,
-                              );
-                              Shortcut.addShortcut(
-                                assetName: 'assets/placeholder.png',
-                                name: activity.split('.').last,
-                                packageName: widget.entity.packageName,
-                                activityName: activity,
-                                intentExtra: {},
-                              );
-                            },
+                  onChange: (value) {
+                    page = value;
+                    setState(() {});
+                    controller.animateToPage(
+                      page,
+                      duration: Duration(
+                        milliseconds: 200,
+                      ),
+                      curve: Curves.ease,
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Expanded(
+                  child: PageView(
+                    controller: controller,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Builder(builder: (context) {
+                          AppEntity entity = widget.entity;
+                          return SingleChildScrollView(
                             child: SizedBox(
-                              height: 48,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    activity,
-                                    style: TextStyle(
-                                      color: AppColors.fontColor,
-                                      fontWeight: FontWeight.w500,
+                              width: MediaQuery.of(context).size.width,
+                              child: Column(
+                                children: [
+                                  buildItem('应用名称', entity.appName),
+                                  buildItem('版本号', entity.versionCode),
+                                  buildItem('版本名称', entity.versionName),
+                                  buildItem('应用包名', entity.packageName),
+                                  buildItem('minSdk', entity.minSdk),
+                                  buildItem('targetSdk', entity.targetSdk),
+                                  buildItem('uid', entity.uid),
+                                  buildItem(
+                                    '应用安装时间',
+                                    entity.details.installTime,
+                                  ),
+                                  buildItem(
+                                    '应用更新时间',
+                                    entity.details.updateTime,
+                                  ),
+                                  buildItem('Apk大小', entity.details.apkSize),
+                                  buildItem('Apk MD5', entity.details.apkMd5),
+                                  buildItem('Apk SHA1', entity.details.apkSha1),
+                                  buildItem(
+                                      'Apk SHA256', entity.details.apkSha256),
+                                  buildItem('Apk路径', entity.apkPath),
+                                  buildItem('so库路径', entity.details.libDir),
+                                  buildItem('私有路径', entity.details.dataDir),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                      Builder(builder: (_) {
+                        List<Widget> children = [];
+                        for (String activity
+                            in widget.entity.details.activitys) {
+                          children.add(Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {
+                                AppUtils.launchActivity(
+                                  widget.entity.packageName,
+                                  activity,
+                                );
+                                Shortcut.addShortcut(
+                                  assetName: 'assets/placeholder.png',
+                                  name: activity.split('.').last,
+                                  packageName: widget.entity.packageName,
+                                  activityName: activity,
+                                  intentExtra: {},
+                                );
+                              },
+                              child: SizedBox(
+                                height: 48,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      activity,
+                                      style: TextStyle(
+                                        color: AppColors.fontColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
+                          ));
+                        }
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: children,
                           ),
-                        ));
-                      }
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: children,
-                        ),
-                      );
-                    }),
-                    Builder(builder: (_) {
-                      List<Widget> children = [];
-                      for (File entity in widget.soLibs) {
-                        children.add(Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {},
-                            child: SizedBox(
-                              height: 48,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        basename(entity.path),
-                                        style: TextStyle(
-                                          color: AppColors.fontColor,
-                                          fontWeight: FontWeight.w500,
+                        );
+                      }),
+                      Builder(builder: (_) {
+                        List<Widget> children = [];
+                        for (SoEntity entity in widget.entity.details.soLibs) {
+                          children.add(Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {},
+                              child: SizedBox(
+                                height: 48,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          path.basename(entity.path),
+                                          style: TextStyle(
+                                            color: AppColors.fontColor,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        '(${FileSizeUtils.getFileSize(entity.lengthSync())})',
-                                        style: TextStyle(
-                                          color: AppColors.fontColor
-                                              .withOpacity(0.6),
-                                          fontWeight: FontWeight.w500,
+                                        Text(
+                                          '(${FileSizeUtils.getFileSizeFromStr(entity.size)})',
+                                          style: TextStyle(
+                                            color: AppColors.fontColor
+                                                .withOpacity(0.6),
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ));
-                      }
+                          ));
+                        }
 
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: children,
-                        ),
-                      );
-                    }),
-                    Text('暂无'),
-                  ],
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: children,
+                          ),
+                        );
+                      }),
+                      Text('暂无'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      );
+    });
+  }
+
+  Widget buildItem(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.fontColor,
+            ),
+          ),
+          SizedBox(
+            width: 8,
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                color: AppColors.fontColor.withOpacity(0.8),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -653,24 +768,50 @@ final List<Color> colors = [
   Colors.amber,
 ];
 
-class DetailsTab extends StatelessWidget {
+class DetailsTab extends StatefulWidget {
   const DetailsTab({
     Key key,
     this.value,
     this.onChange,
+    this.controller,
   }) : super(key: key);
   final int value;
   final void Function(int value) onChange;
+  final PageController controller;
+
+  @override
+  _DetailsTabState createState() => _DetailsTabState();
+}
+
+class _DetailsTabState extends State<DetailsTab> {
+  int _value;
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.value;
+    widget.controller.addListener(() {
+      if (widget.controller.page.round() != _value) {
+        _value = widget.controller.page.round();
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // widget.controller.removeListener(() {});
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [];
     for (int i = 0; i < tabs.length; i++) {
-      bool isCheck = value == i;
+      bool isCheck = _value == i;
       children.add(
         GestureDetector(
           onTap: () {
-            onChange(i);
+            widget.onChange(i);
           },
           child: Container(
             decoration: BoxDecoration(

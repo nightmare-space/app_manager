@@ -1,3 +1,5 @@
+import 'package:app_manager/model/app_details.dart';
+
 class AppEntity {
   AppEntity(
     this.packageName,
@@ -18,6 +20,7 @@ class AppEntity {
   bool freeze;
   bool hide;
   final String uid;
+  AppDetails details;
   @override
   String toString() {
     return 'appName : $appName packageName : $packageName';

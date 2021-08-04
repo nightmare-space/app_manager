@@ -222,7 +222,8 @@ class _AppItemState extends State<AppItem> {
                                           style: TextStyle(
                                             color: highlightOffset.contains(i)
                                                 ? Theme.of(context).primaryColor
-                                                : AppColors.fontColor,
+                                                : AppColors.fontColor
+                                                    .withOpacity(0.8),
                                           ),
                                         ),
                                     ],

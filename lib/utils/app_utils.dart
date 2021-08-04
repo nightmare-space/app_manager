@@ -64,7 +64,7 @@ class AppUtils {
     return infos;
   }
 
-  static Future<String> getAppNativeDir(String package) async {
+  static Future<String> getAppDetails(String package) async {
     if (runOnPackage()) {
       port = 6001;
     }
@@ -72,9 +72,9 @@ class AppUtils {
     // Log.w('等待连接');
     await manager.connect();
     // Log.w('连接成功');
-    manager.sendMsg('getLibDir ' + package + '\n');
-    final String dirPath = (await manager.getString());
-    return dirPath;
+    manager.sendMsg('getAppDetail ' + package + '\n');
+    final String result = (await manager.getString());
+    return result;
   }
 
   static Future<List<String>> getAppActivitys(String package) async {

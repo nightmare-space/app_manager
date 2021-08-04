@@ -5,8 +5,6 @@ import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.*;
-import android.net.LocalServerSocket;
-import android.net.LocalSocket;
 import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
@@ -90,7 +88,7 @@ public class AppInfo {
             } else if (data.startsWith("getAllAppInfo")) {
                 System.out.println("响应AppInfo");
                 System.out.flush();
-                handleAllAppInfo(os, context, data.replace("getAppInfo ", ""));
+                handleAllAppInfo(os, context, data.replace("getAllAppInfo ", ""));
             } else if (data.startsWith("getAllIconData")) {
                 System.out.println("响应AllAppIcon");
                 System.out.flush();
@@ -98,12 +96,14 @@ public class AppInfo {
             } else if (data.startsWith("getAppActivity")) {
                 System.out.println("响应getAppActivity");
                 System.out.flush();
-                handleAppActivitys(os, context, data.replace("getAppActivity ", ""));
-            } else if (data.startsWith("getLibDir")) {
-                System.out.println("响应getLibDir");
+
+                AppInfo appInfo = new AppInfo(context);
+                os.write(appInfo.getAppActivitys(data.replace("getAppActivity ", "")).getBytes());
+            } else if (data.startsWith("getAppDetail")) {
+                System.out.println("响应getAppDetail");
                 System.out.flush();
                 AppInfo appInfo = new AppInfo(context);
-                os.write(appInfo.getAppShareLibDir(data.replace("getLibDir ", "")).getBytes());
+                os.write(appInfo.getAppDetail(data.replace("getAppDetail ", "")).getBytes());
             }
             socket.setReuseAddress(true);
             socket.close();
@@ -131,10 +131,6 @@ public class AppInfo {
         }
     }
 
-    public static void handleAppActivitys(OutputStream outputStream, Context context, String data) throws IOException {
-        AppInfo appInfo = new AppInfo(context);
-        outputStream.write(appInfo.getAppActivitys(data).getBytes());
-    }
 
     public static void handleAllAppInfo(OutputStream outputStream, Context context, String data) throws IOException {
         AppInfo appInfo = new AppInfo(context);
@@ -157,10 +153,13 @@ public class AppInfo {
 
     }
 
-    public String getAppShareLibDir(String data) {
+    public String getAppDetail(String data) {
         StringBuilder builder = new StringBuilder();
         try {
             PackageInfo packageInfo = context.getPackageManager().getPackageInfo(data, PackageManager.GET_UNINSTALLED_PACKAGES);
+            builder.append(packageInfo.firstInstallTime).append("\r");
+            builder.append(packageInfo.lastUpdateTime).append("\r");
+            builder.append(packageInfo.applicationInfo.dataDir).append("\r");
             builder.append(packageInfo.applicationInfo.nativeLibraryDir);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
