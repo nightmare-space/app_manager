@@ -62,11 +62,14 @@ class _AppSettingPageState extends State<AppSettingPage> {
     details.dataDir = results[2];
     details.libDir = results[3];
     String ls = await Global().exec('ls ${details.libDir}');
-    for (String path in ls.split('\n')) {
-      details.soLibs.add(
-        SoEntity(path, await getFileSize(details.libDir + '/' + path)),
-      );
+    if (ls.isNotEmpty) {
+      for (String path in ls.split('\n')) {
+        details.soLibs.add(
+          SoEntity(path, await getFileSize(details.libDir + '/' + path)),
+        );
+      }
     }
+
     details.apkSize = '';
     String md5 = await Global().exec('md5sum ${widget.entity.apkPath}');
     md5 = md5.replaceAll(RegExp(' .*'), '');
@@ -81,6 +84,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
     List<String> pers = await AppUtils.getAppPermission(
       widget.entity.packageName,
     );
+    Log.w('pers -> $pers');
     for (String line in pers) {
       String name = line.split(' ').first;
       String des = line.split(' ')[1];
