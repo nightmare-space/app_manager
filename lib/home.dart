@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:app_manager/global/config.dart';
-import 'package:app_manager/utils/socket_util.dart';
 import 'package:app_manager/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,12 +7,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 import 'global/global.dart';
-import 'page/already_install.dart';
 import 'page/common_app_page.dart';
 import 'page/long_press_dialog.dart';
 import 'controller/app_manager_controller.dart';
 import 'controller/check_controller.dart';
-import 'utils/app_utils.dart';
 
 class AppManagerWithoutMaterialpp extends StatelessWidget {
   const AppManagerWithoutMaterialpp({Key key}) : super(key: key);
@@ -76,7 +72,7 @@ class _AppManagerState extends State<AppManager>
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: Color(0xfff5f5f7),
+        backgroundColor: const Color(0xfff5f5f7),
         body: SafeArea(
           child: Column(
             children: [
@@ -93,21 +89,21 @@ class _AppManagerState extends State<AppManager>
                           filter = data;
                           setState(() {});
                         },
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                         decoration: InputDecoration(
-                          fillColor: Color(0xffeeeeee),
+                          fillColor: const Color(0xffeeeeee),
                           hintText: '过滤',
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             gapPadding: 0,
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               width: 0,
                               color: Colors.transparent,
                             ),
@@ -115,7 +111,7 @@ class _AppManagerState extends State<AppManager>
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             gapPadding: 0,
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               width: 0,
                               color: Colors.transparent,
                             ),
@@ -126,7 +122,7 @@ class _AppManagerState extends State<AppManager>
                     ),
                     NiIconButton(
                       onTap: () {},
-                      child: Icon(Icons.more_vert),
+                      child: const Icon(Icons.more_vert),
                     ),
                   ],
                 ),
@@ -143,8 +139,8 @@ class _AppManagerState extends State<AppManager>
                         appList: ctl.sysApps,
                         filter: filter.toLowerCase(),
                       ),
-                      CommonAppPage(),
-                      CommonAppPage(),
+                      const CommonAppPage(),
+                      const CommonAppPage(),
                     ][_currentIndex],
                   );
                 }),
@@ -153,7 +149,7 @@ class _AppManagerState extends State<AppManager>
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Color(0xfff5f5f7),
+          backgroundColor: const Color(0xfff5f5f7),
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
@@ -191,13 +187,13 @@ class _AppManagerState extends State<AppManager>
         floatingActionButton: GetBuilder<CheckController>(builder: (_) {
           if (checkController.check.length > 1) {
             return FloatingActionButton(
-              child: Icon(Icons.more_vert),
+              child: const Icon(Icons.more_vert),
               onPressed: () {
-                Get.bottomSheet(LongPress());
+                Get.bottomSheet(const LongPress());
               },
             );
           } else {
-            return SizedBox();
+            return const SizedBox();
           }
         }),
       ),

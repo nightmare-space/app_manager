@@ -1,11 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:app_manager/global/config.dart';
-import 'package:app_manager/global/icon_store.dart';
-import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/utils/app_utils.dart';
-import 'package:app_manager/utils/platform_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:global_repository/global_repository.dart';
@@ -20,7 +14,6 @@ class AppIconHeader extends StatefulWidget {
 
 class _AppIconHeaderState extends State<AppIconHeader> {
   bool imgExist = false;
-  List<int> _bytes = [];
   bool prepare = false;
   @override
   void initState() {
@@ -63,7 +56,7 @@ class _AppIconHeaderState extends State<AppIconHeader> {
   @override
   Widget build(BuildContext context) {
     if (!prepare) {
-      return SizedBox(
+      return const SizedBox(
         width: 54,
         height: 54,
         child: SpinKitDoubleBounce(

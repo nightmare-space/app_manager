@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:global_repository/global_repository.dart';
 
 class NiIconButton extends StatelessWidget {
   const NiIconButton({Key key, this.child, this.onTap}) : super(key: key);
@@ -7,7 +6,7 @@ class NiIconButton extends StatelessWidget {
   final GestureTapCallback onTap;
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 48,
       height: 48,
       child: InkWell(
@@ -17,7 +16,7 @@ class NiIconButton extends StatelessWidget {
           Feedback.forLongPress(context);
         },
         child: Padding(
-          padding: EdgeInsets.all(12),
+          padding: const EdgeInsets.all(12),
           child: child,
         ),
       ),

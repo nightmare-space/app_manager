@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:app_manager/global/config.dart';
 import 'package:app_manager/global/global.dart';

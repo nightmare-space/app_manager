@@ -1,5 +1,3 @@
-import 'dart:io';
-
 class AppDetails {
   AppDetails({
     this.installTime,

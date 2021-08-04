@@ -1,11 +1,8 @@
 import 'dart:io';
 
 import 'package:app_manager/global/global.dart';
-import 'package:app_manager/global/icon_store.dart';
 import 'package:app_manager/model/app.dart';
 import 'package:app_manager/utils/app_utils.dart';
-import 'package:app_manager/utils/socket_util.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 

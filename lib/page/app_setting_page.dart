@@ -10,7 +10,6 @@ import 'package:app_manager/utils/app_utils.dart';
 import 'package:app_manager/utils/route_extension.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:app_manager/widgets/custom_icon_button.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -90,17 +89,17 @@ class _AppSettingPageState extends State<AppSettingPage> {
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: Color(0xfff0f0f0).withOpacity(0.1),
+        backgroundColor: const Color(0xfff0f0f0).withOpacity(0.1),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
+            padding: const EdgeInsets.symmetric(
               horizontal: 4,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -108,9 +107,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
                         onTap: () {
                           Navigator.of(context).pop();
                         },
-                        child: Icon(Icons.arrow_back_ios_new),
+                        child: const Icon(Icons.arrow_back_ios_new),
                       ),
-                      Container(
+                      SizedBox(
                         height: 48,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
@@ -122,7 +121,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                           onTapDown: (_) {
                             Feedback.forLongPress(context);
                           },
-                          child: Padding(
+                          child: const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 16),
                             child: Center(
                               child: Text(
@@ -167,7 +166,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
+                                    const Text(
                                       '应用名 : ',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -175,13 +174,13 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                       ),
                                     ),
                                     Text(entity.appName),
-                                    SizedBox(width: 16),
+                                    const SizedBox(width: 16),
                                   ],
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    Text(
+                                    const Text(
                                       'UID : ',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -191,10 +190,10 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     Text(entity.uid),
                                   ],
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    Text(
+                                    const Text(
                                       'Version Name : ',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -204,10 +203,10 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     Text(entity.versionName),
                                   ],
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    Text(
+                                    const Text(
                                       'Version Code : ',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -248,7 +247,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ));
                                     showToast('包名已复制');
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     '包名',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -256,16 +255,16 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 4,
                                 ),
                                 Text(
-                                  '${widget.entity.packageName}',
+                                  widget.entity.packageName,
                                   style: TextStyle(
                                     color: AppColors.fontColor.withOpacity(0.6),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 4,
                                 ),
                                 InkWell(
@@ -275,7 +274,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ));
                                     showToast('minSdk已复制');
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     'minSdk',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -283,16 +282,16 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 4,
                                 ),
                                 Text(
-                                  '${widget.entity.minSdk}',
+                                  widget.entity.minSdk,
                                   style: TextStyle(
                                     color: AppColors.fontColor.withOpacity(0.6),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 4,
                                 ),
                                 InkWell(
@@ -302,7 +301,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ));
                                     showToast('targetSdk已复制');
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     'targetSdk',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -310,11 +309,11 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 4,
                                 ),
                                 Text(
-                                  '${widget.entity.targetSdk}',
+                                  widget.entity.targetSdk,
                                   style: TextStyle(
                                     color: AppColors.fontColor.withOpacity(0.6),
                                   ),
@@ -356,7 +355,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
                                   height: 4,
                                 ),
                                 Text(
-                                  '${widget.entity.apkPath}',
+                                  widget.entity.apkPath,
                                   style: TextStyle(
                                     color: AppColors.fontColor.withOpacity(0.6),
                                   ),
@@ -544,7 +543,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
   Widget build(BuildContext context) {
     return GetBuilder<AppManagerController>(builder: (_) {
       if (widget.entity.details == null) {
-        return SpinKitThreeBounce(
+        return const SpinKitThreeBounce(
           color: Colors.indigo,
           size: 24,
         );
@@ -566,7 +565,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                     setState(() {});
                     controller.animateToPage(
                       page,
-                      duration: Duration(
+                      duration: const Duration(
                         milliseconds: 200,
                       ),
                       curve: Curves.ease,
@@ -648,7 +647,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       activity,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: AppColors.fontColor,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -683,7 +682,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                                       children: [
                                         Text(
                                           path.basename(entity.path),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: AppColors.fontColor,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -711,7 +710,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                           ),
                         );
                       }),
-                      Text('暂无'),
+                      const Text('暂无'),
                     ],
                   ),
                 ),
@@ -732,12 +731,12 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.fontColor,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 8,
           ),
           Expanded(
@@ -822,7 +821,7 @@ class _DetailsTabState extends State<DetailsTab> {
               horizontal: 12,
               vertical: 8,
             ),
-            margin: EdgeInsets.symmetric(
+            margin: const EdgeInsets.symmetric(
               horizontal: 4,
             ),
             child: Text(

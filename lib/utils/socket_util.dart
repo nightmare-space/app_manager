@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:global_repository/global_repository.dart';
 
 const int msgByteLen = 2;
 const int msgCodeByteLen = 2;
@@ -68,7 +67,7 @@ class SocketWrapper {
       socket.add(utf8.encode(msg));
       socket.flush();
     } catch (e) {
-      print('e=${e.toString()}');
+      debugPrint('e=${e.toString()}');
     }
   }
 

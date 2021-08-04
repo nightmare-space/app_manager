@@ -1,15 +1,8 @@
-import 'package:app_manager/model/app.dart';
-import 'package:app_manager/controller/app_manager_controller.dart';
-import 'package:app_manager/theme/app_colors.dart';
-import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:get/get.dart';
-import 'package:global_repository/global_repository.dart';
 
 import 'common_app_page.dart';
-import 'long_press_dialog.dart';
 
+// ignore: use_key_in_widget_constructors
 class AlreadyInstall extends StatefulWidget {
   @override
   _AlreadyInstallState createState() => _AlreadyInstallState();
@@ -33,7 +26,7 @@ class _AlreadyInstallState extends State<AlreadyInstall>
             Expanded(
               child: TabBarView(
                 controller: tabController,
-                children: <Widget>[
+                children: const <Widget>[
                   CommonAppPage(),
                 ],
               ),

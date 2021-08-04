@@ -18,7 +18,6 @@ class Global {
   Map<String, List<int>> iconCacheMap = {};
   YanProcess process = YanProcess();
   Future<void> initProcess() async {
-    // TODO这儿可能有问题，adb 工具集成的时候，不需要执行su
     await process.exec('su');
   }
 

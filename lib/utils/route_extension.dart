@@ -15,7 +15,7 @@ extension StateRoute on State {
 
   Future<void> pop() async {
     Navigator.of(context).pop();
-    await Future.delayed(Duration(milliseconds: 400));
+    await Future.delayed(const Duration(milliseconds: 400));
   }
 }
 
@@ -38,6 +38,6 @@ extension ContextRoute on BuildContext {
 
   Future<void> pop() async {
     Navigator.of(this).pop();
-    await Future.delayed(Duration(milliseconds: 400));
+    await Future.delayed(const Duration(milliseconds: 400));
   }
 }

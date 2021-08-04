@@ -3,16 +3,11 @@ import 'package:app_manager/page/app_setting_page.dart';
 import 'package:app_manager/controller/app_manager_controller.dart';
 import 'package:app_manager/controller/check_controller.dart';
 import 'package:app_manager/theme/app_colors.dart';
-import 'package:app_manager/utils/app_utils.dart';
 import 'package:app_manager/utils/route_extension.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:global_repository/global_repository.dart';
-
-import 'already_install.dart';
-import 'long_press_dialog.dart';
 
 class CommonAppPage extends StatefulWidget {
   const CommonAppPage({
@@ -41,7 +36,7 @@ class CommonAppPageState extends State<CommonAppPage> {
   Widget build(BuildContext context) {
     List<AppEntity> apps = List.from(widget.appList);
     if (apps.isEmpty) {
-      return SpinKitThreeBounce(
+      return const SpinKitThreeBounce(
         color: AppColors.accentColor,
         size: 16.0,
       );
@@ -54,8 +49,8 @@ class CommonAppPageState extends State<CommonAppPage> {
       }
       return ListView.builder(
         itemCount: apps.length,
-        padding: EdgeInsets.only(bottom: 60),
-        physics: BouncingScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 60),
+        physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext c, int i) {
           return AppItem(
             entity: apps[i],
@@ -146,7 +141,7 @@ class _AppItemState extends State<AppItem> {
                                   return RichText(
                                     text: TextSpan(
                                       text: '',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: AppColors.fontColor,
                                       ),
                                       children: [
@@ -170,21 +165,21 @@ class _AppItemState extends State<AppItem> {
                               }
                               return Text(
                                 entity.appName,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: AppColors.fontColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               );
                             }),
                             if (entity.freeze)
-                              Text(
+                              const Text(
                                 '(被冻结)',
                                 style: TextStyle(
                                   color: Colors.red,
                                 ),
                               ),
                             if (entity.hide)
-                              Text(
+                              const Text(
                                 '(被隐藏)',
                                 style: TextStyle(
                                   color: Colors.red,
@@ -210,7 +205,7 @@ class _AppItemState extends State<AppItem> {
                                 return RichText(
                                   text: TextSpan(
                                     text: '',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: AppColors.fontColor,
                                     ),
                                     children: [
