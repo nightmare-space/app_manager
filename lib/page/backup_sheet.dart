@@ -91,11 +91,13 @@ class _BackupSheetState extends State<BackupSheet> {
               borderRadius: 12,
               color: AppColors.accentColor,
               onTap: () {
+                Get.back();
                 Get.to(
-                    BackupPage(
-                      entitys: widget.entitys,
-                    ),
-                    preventDuplicates: false);
+                  BackupPage(
+                    entitys: widget.entitys,
+                  ),
+                  preventDuplicates: false,
+                );
               },
               child: SizedBox(
                 height: 48,

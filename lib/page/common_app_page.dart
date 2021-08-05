@@ -97,7 +97,7 @@ class _AppItemState extends State<AppItem> {
     AppEntity entity = widget.entity;
     final check = checkController.check;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
@@ -105,9 +105,12 @@ class _AppItemState extends State<AppItem> {
         child: InkWell(
           onTap: handleOnTap,
           onLongPress: () {
-            push(AppSettingPage(
+            Get.bottomSheet(AppSettingPage(
               entity: entity,
             ));
+            // push(AppSettingPage(
+            //   entity: entity,
+            // ));
             // showCustomDialog<void>(
             //     context: context,
             //     child: LongPress(
@@ -115,7 +118,7 @@ class _AppItemState extends State<AppItem> {
             //     ));
           },
           child: Padding(
-            padding: const EdgeInsets.all(4.0),
+            padding: const EdgeInsets.all(2.0),
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Row(
@@ -125,9 +128,13 @@ class _AppItemState extends State<AppItem> {
                   Expanded(
                     child: Row(
                       children: <Widget>[
-                        AppIconHeader(
-                          key: Key(entity.packageName),
-                          packageName: entity.packageName,
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: AppIconHeader(
+                            key: Key(entity.packageName),
+                            packageName: entity.packageName,
+                          ),
                         ),
                         Expanded(
                           child: Column(

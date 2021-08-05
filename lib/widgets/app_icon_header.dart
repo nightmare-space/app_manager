@@ -5,9 +5,13 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:global_repository/global_repository.dart';
 
 class AppIconHeader extends StatefulWidget {
-  const AppIconHeader({Key key, this.packageName}) : super(key: key);
+  const AppIconHeader({
+    Key key,
+    this.packageName,
+    this.padding = const EdgeInsets.all(8.0),
+  }) : super(key: key);
   final String packageName;
-
+  final EdgeInsets padding;
   @override
   _AppIconHeaderState createState() => _AppIconHeaderState();
 }
@@ -66,10 +70,8 @@ class _AppIconHeaderState extends State<AppIconHeader> {
       );
     } else {
       return SizedBox(
-        width: 54,
-        height: 54,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: widget.padding,
           child: Image.file(
             File(RuntimeEnvir.filesPath +
                 '/AppManager/.icon/${widget.packageName}'),

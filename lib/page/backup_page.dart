@@ -28,10 +28,13 @@ class BackupPage extends StatefulWidget {
 }
 
 class _BackupPageState extends State<BackupPage> {
+  String dataPath = '/sdcard/YanTool/AppManager';
   int limit = 1;
   int current = 0;
+  int index = 0;
   AppEntity currentApp;
   String backupPath;
+  bool startBackupData = false;
 
   @override
   void initState() {
@@ -42,13 +45,18 @@ class _BackupPageState extends State<BackupPage> {
   Future<void> execBackup() async {
     await Future.delayed(Duration(milliseconds: 100));
     for (AppEntity entity in widget.entitys) {
+      index++;
       currentApp = entity;
       setState(() {});
       computeSpeed();
-      Directory('/sdcard/YanTool/AppManager').createSync();
-      backupPath =
-          '/sdcard/YanTool/AppManager/${path.basename(currentApp.apkPath)}';
+      Directory('$dataPath').createSync();
+      backupPath = '$dataPath/${currentApp.appName}.apk';
       await Global().exec('cp ${currentApp.apkPath} $backupPath');
+      startBackupData = true;
+      setState(() {});
+      await Global().exec(
+        'tar -zcvf $dataPath/${currentApp.appName}.tar.gz /data/data/${currentApp.packageName}',
+      );
     }
   }
 
@@ -101,18 +109,32 @@ class _BackupPageState extends State<BackupPage> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  '${currentApp.appName}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${currentApp.appName}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: AppColors.fontColor,
+                                      ),
+                                    ),
+                                    Text(
+                                      ' (${index}/${widget.entitys.length})',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: AppColors.fontColor
+                                            .withOpacity(0.6),
+                                      ),
+                                    )
+                                  ],
                                 ),
                                 SizedBox(
                                   height: 4,
                                 ),
                                 Text(
-                                  '正在备份Apk',
+                                  startBackupData ? '正在备份数据' : '正在备份Apk',
                                   style: TextStyle(
                                     fontSize: 14,
                                   ),
@@ -143,12 +165,12 @@ class _BackupPageState extends State<BackupPage> {
                                     ? AppColors.accentColor
                                     : AppColors.accentColor,
                               ),
-                              value: value,
+                              value: startBackupData ? null : value,
                             );
                           },
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                     ],
                   ),
                 ),
