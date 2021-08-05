@@ -19,6 +19,7 @@ class AppColors {
   static const Color accentColor = Colors.indigo;
   static const Color background = Color(0xfff5f5f7);
   //
+  static Color contentBorder = const Color(0xffebebed);
   // static const Color accentColor = Color(0xffb9135d);
 
   // static const Color accentColor = Color(0xff867ae8);

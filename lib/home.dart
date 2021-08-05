@@ -132,10 +132,12 @@ class _AppManagerState extends State<AppManager>
                   return SafeArea(
                     child: <Widget>[
                       CommonAppPage(
+                        key: Key('user'),
                         appList: ctl.userApps,
                         filter: filter.toLowerCase(),
                       ),
                       CommonAppPage(
+                        key: Key('sys'),
                         appList: ctl.sysApps,
                         filter: filter.toLowerCase(),
                       ),

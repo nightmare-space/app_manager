@@ -22,6 +22,7 @@ class CommonAppPage extends StatefulWidget {
 }
 
 class CommonAppPageState extends State<CommonAppPage> {
+  final ScrollController _scrollController = ScrollController();
   @override
   void initState() {
     super.initState();
@@ -29,6 +30,7 @@ class CommonAppPageState extends State<CommonAppPage> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -48,6 +50,7 @@ class CommonAppPageState extends State<CommonAppPage> {
         });
       }
       return ListView.builder(
+        controller: _scrollController,
         itemCount: apps.length,
         padding: const EdgeInsets.only(bottom: 60),
         physics: const BouncingScrollPhysics(),
@@ -93,160 +96,186 @@ class _AppItemState extends State<AppItem> {
   Widget build(BuildContext context) {
     AppEntity entity = widget.entity;
     final check = checkController.check;
-    return InkWell(
-      onTap: handleOnTap,
-      onLongPress: () {
-        push(AppSettingPage(
-          entity: entity,
-        ));
-        // showCustomDialog<void>(
-        //     context: context,
-        //     child: LongPress(
-        //       apps: <AppEntity>[apps[i]],
-        //     ));
-      },
-      child: SizedBox(
-        height: 54.0,
-        width: MediaQuery.of(context).size.width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Expanded(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: handleOnTap,
+          onLongPress: () {
+            push(AppSettingPage(
+              entity: entity,
+            ));
+            // showCustomDialog<void>(
+            //     context: context,
+            //     child: LongPress(
+            //       apps: <AppEntity>[apps[i]],
+            //     ));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  AppIconHeader(
-                    key: Key(entity.packageName),
-                    packageName: entity.packageName,
-                  ),
                   Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: <Widget>[
-                        Row(
-                          children: [
-                            Builder(builder: (_) {
-                              if (widget.filter.isNotEmpty) {
-                                int index = entity.appName
-                                    .toLowerCase()
-                                    .indexOf(widget.filter);
-                                if (index != -1) {
-                                  List<int> highlightOffset = [index];
-                                  for (int i = 0;
-                                      i < widget.filter.length - 1;
-                                      i++) {
-                                    highlightOffset.add(highlightOffset[i] + 1);
-                                  }
-                                  return RichText(
-                                    text: TextSpan(
-                                      text: '',
+                        AppIconHeader(
+                          key: Key(entity.packageName),
+                          packageName: entity.packageName,
+                        ),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                children: [
+                                  Builder(builder: (_) {
+                                    if (widget.filter.isNotEmpty) {
+                                      int index = entity.appName
+                                          .toLowerCase()
+                                          .indexOf(widget.filter);
+                                      if (index != -1) {
+                                        List<int> highlightOffset = [index];
+                                        for (int i = 0;
+                                            i < widget.filter.length - 1;
+                                            i++) {
+                                          highlightOffset
+                                              .add(highlightOffset[i] + 1);
+                                        }
+                                        return RichText(
+                                          text: TextSpan(
+                                            text: '',
+                                            style: const TextStyle(
+                                              color: AppColors.fontColor,
+                                            ),
+                                            children: [
+                                              for (int i = 0;
+                                                  i < entity.appName.length;
+                                                  i++)
+                                                TextSpan(
+                                                  text: entity.appName[i],
+                                                  style: TextStyle(
+                                                    color: highlightOffset
+                                                            .contains(i)
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : AppColors.fontColor,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    }
+                                    return Text(
+                                      entity.appName,
                                       style: const TextStyle(
                                         color: AppColors.fontColor,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      children: [
-                                        for (int i = 0;
-                                            i < entity.appName.length;
-                                            i++)
-                                          TextSpan(
-                                            text: entity.appName[i],
-                                            style: TextStyle(
-                                              color: highlightOffset.contains(i)
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : AppColors.fontColor,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                    );
+                                  }),
+                                  if (entity.freeze)
+                                    const Text(
+                                      '(被冻结)',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  if (entity.hide)
+                                    const Text(
+                                      '(被隐藏)',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              SingleChildScrollView(
+                                controller: ScrollController(),
+                                scrollDirection: Axis.horizontal,
+                                child: Builder(builder: (_) {
+                                  if (widget.filter.isNotEmpty) {
+                                    int index = entity.packageName
+                                        .toLowerCase()
+                                        .indexOf(widget.filter);
+                                    if (index != -1) {
+                                      List<int> highlightOffset = [index];
+                                      for (int i = 0;
+                                          i < widget.filter.length - 1;
+                                          i++) {
+                                        highlightOffset
+                                            .add(highlightOffset[i] + 1);
+                                      }
+                                      return RichText(
+                                        text: TextSpan(
+                                          text: '',
+                                          style: const TextStyle(
+                                            color: AppColors.fontColor,
                                           ),
-                                      ],
+                                          children: [
+                                            for (int i = 0;
+                                                i < entity.packageName.length;
+                                                i++)
+                                              TextSpan(
+                                                text: entity.packageName[i],
+                                                style: TextStyle(
+                                                  color: highlightOffset
+                                                          .contains(i)
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : AppColors.fontColor
+                                                          .withOpacity(0.8),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  }
+                                  return Text(
+                                    entity.packageName,
+                                    style: TextStyle(
+                                      color:
+                                          AppColors.fontColor.withOpacity(0.9),
                                     ),
                                   );
-                                }
-                              }
-                              return Text(
-                                entity.appName,
-                                style: const TextStyle(
-                                  color: AppColors.fontColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            }),
-                            if (entity.freeze)
-                              const Text(
-                                '(被冻结)',
+                                }),
+                              ),
+                              SizedBox(
+                                height: 4,
+                              ),
+                              Text(
+                                '${entity.versionCode}(${entity.versionName})',
                                 style: TextStyle(
-                                  color: Colors.red,
+                                  fontSize: 12,
+                                  color: AppColors.fontColor.withOpacity(0.4),
                                 ),
                               ),
-                            if (entity.hide)
-                              const Text(
-                                '(被隐藏)',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                ),
-                              ),
-                          ],
-                        ),
-                        SingleChildScrollView(
-                          controller: ScrollController(),
-                          scrollDirection: Axis.horizontal,
-                          child: Builder(builder: (_) {
-                            if (widget.filter.isNotEmpty) {
-                              int index = entity.packageName
-                                  .toLowerCase()
-                                  .indexOf(widget.filter);
-                              if (index != -1) {
-                                List<int> highlightOffset = [index];
-                                for (int i = 0;
-                                    i < widget.filter.length - 1;
-                                    i++) {
-                                  highlightOffset.add(highlightOffset[i] + 1);
-                                }
-                                return RichText(
-                                  text: TextSpan(
-                                    text: '',
-                                    style: const TextStyle(
-                                      color: AppColors.fontColor,
-                                    ),
-                                    children: [
-                                      for (int i = 0;
-                                          i < entity.packageName.length;
-                                          i++)
-                                        TextSpan(
-                                          text: entity.packageName[i],
-                                          style: TextStyle(
-                                            color: highlightOffset.contains(i)
-                                                ? Theme.of(context).primaryColor
-                                                : AppColors.fontColor
-                                                    .withOpacity(0.8),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            }
-                            return Text(
-                              entity.packageName,
-                              style: TextStyle(
-                                color: AppColors.fontColor.withOpacity(0.8),
-                              ),
-                            );
-                          }),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  Checkbox(
+                    value: check.contains(entity),
+                    onChanged: (bool v) {
+                      handleOnTap();
+                    },
+                  )
                 ],
               ),
             ),
-            Checkbox(
-              value: check.contains(entity),
-              onChanged: (bool v) {
-                handleOnTap();
-              },
-            )
-          ],
+          ),
         ),
       ),
     );

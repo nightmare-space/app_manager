@@ -183,4 +183,8 @@ class AppUtils {
       ].join('\n'),
     );
   }
+
+  static Future<String> getFileSize(String path) async {
+    return await Global().exec('stat -c "%s" $path');
+  }
 }

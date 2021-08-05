@@ -421,7 +421,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
                             intent.launch();
                           }),
                           buildItem('备份', danger: false, onTap: () {
-                            Get.bottomSheet(const BackupSheet());
+                            Get.bottomSheet(BackupSheet(
+                              entitys: [widget.entity, widget.entity],
+                            ));
                             // AppUtils.clearAppData(entity.packageName);
                           }),
                           buildItem('清除App数据', danger: true, onTap: () {
@@ -622,7 +624,12 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                                     '应用更新时间',
                                     entity.details.updateTime,
                                   ),
-                                  buildItem('Apk大小', entity.details.apkSize),
+                                  buildItem(
+                                    'Apk大小',
+                                    FileSizeUtils.getFileSizeFromStr(
+                                      entity.details.apkSize,
+                                    ),
+                                  ),
                                   buildItem('Apk MD5', entity.details.apkMd5),
                                   buildItem('Apk SHA1', entity.details.apkSha1),
                                   buildItem(

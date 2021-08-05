@@ -8,8 +8,11 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 
+import 'backup_page.dart';
+
 class BackupSheet extends StatefulWidget {
-  const BackupSheet({Key key}) : super(key: key);
+  const BackupSheet({Key key, this.entitys = const []}) : super(key: key);
+  final List<AppEntity> entitys;
 
   @override
   _BackupSheetState createState() => _BackupSheetState();
@@ -87,7 +90,13 @@ class _BackupSheetState extends State<BackupSheet> {
             NiCardButton(
               borderRadius: 12,
               color: AppColors.accentColor,
-              onTap: () {},
+              onTap: () {
+                Get.to(
+                    BackupPage(
+                      entitys: widget.entitys,
+                    ),
+                    preventDuplicates: false);
+              },
               child: SizedBox(
                 height: 48,
                 child: Center(
