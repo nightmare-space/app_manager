@@ -20,7 +20,12 @@ AAM是一款管理安卓应用的客户端，使用Flutter框架开发，支持�
 **在没有Root的设备上只支持部分功能，桌面端不受影响**
 
 ## 截图
+！[](https://raw.githubusercontent.com/nightmare-space/app_manager/main/screenshot/app_info.jpg)
+！[](https://raw.githubusercontent.com/nightmare-space/app_manager/main/screenshot/sys_list.jpg)
+！[](https://raw.githubusercontent.com/nightmare-space/app_manager/main/screenshot/search.jpg)
+
 ## 获取这个App
+私人服务器:[链接](链接)
 
 ## 开发者文档
 
