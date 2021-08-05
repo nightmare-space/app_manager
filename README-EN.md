@@ -21,6 +21,8 @@ Developed using the Flutter framework，Highly available Android application man
 ## Screenshot
 ## Get the app
 ## Developers
+See [DEVELOP.md](DEVELOP.md)
+
 ## Licence
 ```
 Copyright (c) 2021, nightmare

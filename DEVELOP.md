@@ -5,12 +5,14 @@
 分以下几种数据响应:
 
 **1.getIconData**
+
 获取单个App Icon字节流，例如 `getIconData com.nightmare`
 ```sh
 // 直接返回字节流
 ```
 
 **2.getAllAppInfo**
+
 获取多个App简略信息，例如 `getAllAppInfo com.nightmare com.nightmare.adbtool`
 ```sh
 // 返回下列信息拼接的字符串
@@ -18,12 +20,14 @@ apkLabel minSdkVersion targetSdkVersion versionName versionCode
 ```
 
 **3.getAllIconData**
+
 获取多个App Icon字节流。
 ```sh
 // 返回所有图片拼接的字节流，所以需要根据 PNG 图片的编码的图片头进行拆分。
 ```
 
 **4.getAppActivity**
+
 获取单个App的activity的列表。
 ```sh
 // 例如
@@ -31,6 +35,8 @@ apkLabel minSdkVersion targetSdkVersion versionName versionCode
 ```
 
 **5.getAppDetail**
+
+获取App详细信息
 ```sh
 // 返回下列信息拼接的字符串
 应用安装时间 最近更新时间 Apk大小 ApkMd5 ApkSha1 ApkSha256 私有文件路径 lib路径
@@ -56,3 +62,14 @@ App 运行在安卓上时，会有套接字的服务端，而运行在 PC 平台
 ## 备份功能实现
 需要关注的细节是，当 App 被卸载重新安装后，App uid 是会改变的，
 tar 解压会回复重装前 app 的 uid。
+
+### 备份
+```sh
+tar -zcvf $gz $dataDir
+```
+
+### 恢复
+```sh
+tar -xvf     sysconfig.tar -C /
+chown -R  10590:10590 /data/data/com.nightmare.adbtools/
+```
