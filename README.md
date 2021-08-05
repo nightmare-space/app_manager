@@ -1,6 +1,9 @@
 # Android应用管理器
 Language: 中文简体 | [English](README-EN.md)
-
+[![Last Commits](https://img.shields.io/github/last-commit/nightmare-space/app_manager?logo=git&logoColor=white)](https://github.com/nightmare-space/app_manager/commits/master)
+[![Pull Requests](https://img.shields.io/github/issues-pr/nightmare-space/app_manager?logo=github&logoColor=white)](https://github.com/nightmare-space/app_manager/pulls)
+[![Code size](https://img.shields.io/github/languages/code-size/nightmare-space/app_manager?logo=github&logoColor=white)](https://github.com/nightmare-space/app_manager)
+[![License](https://img.shields.io/github/license/nightmare-space/app_manager?logo=open-source-initiative&logoColor=green)](https://github.com/nightmare-space/app_manager/blob/master/LICENSE)
 AAM是一款管理安卓应用的客户端，使用Flutter框架开发，支持安卓与桌面平台。
 
 ## 功能列表
