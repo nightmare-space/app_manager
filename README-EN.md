@@ -1,6 +1,11 @@
 # Android App Manager
 语言: English | [中文](README.md)
 
+[![Last Commits](https://img.shields.io/github/last-commit/nightmare-space/app_manager?logo=git&logoColor=white)](https://github.com/nightmare-space/app_manager/commits/master)
+[![Pull Requests](https://img.shields.io/github/issues-pr/nightmare-space/app_manager?logo=github&logoColor=white)](https://github.com/nightmare-space/app_manager/pulls)
+[![Code size](https://img.shields.io/github/languages/code-size/nightmare-space/app_manager?logo=github&logoColor=white)](https://github.com/nightmare-space/app_manager)
+[![License](https://img.shields.io/github/license/nightmare-space/app_manager?logo=open-source-initiative&logoColor=green)](https://github.com/nightmare-space/app_manager/blob/master/LICENSE)
+
 Developed using the Flutter framework，Highly available Android application manager。
 
 ## Features
