@@ -195,6 +195,7 @@ class _AppItemState extends State<AppItem> {
                                       '(被冻结)',
                                       style: TextStyle(
                                         color: Colors.red,
+                                        height: 1,
                                       ),
                                     ),
                                   if (entity.hide)
@@ -202,6 +203,7 @@ class _AppItemState extends State<AppItem> {
                                       '(被隐藏)',
                                       style: TextStyle(
                                         color: Colors.red,
+                                        height: 1,
                                       ),
                                     ),
                                 ],
@@ -261,7 +263,7 @@ class _AppItemState extends State<AppItem> {
                                 height: 4,
                               ),
                               Text(
-                                '${entity.versionCode}(${entity.versionName})',
+                                '${entity.versionName}(${entity.versionCode})',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.fontColor.withOpacity(0.4),

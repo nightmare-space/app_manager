@@ -320,7 +320,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
         );
       }
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +330,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                 onTap: () {
                   Navigator.of(context).pop();
                 },
-                child: Icon(Icons.arrow_back_ios_new),
+                child: const Icon(Icons.arrow_back_ios_new),
               ),
               buildBody(),
               Padding(
@@ -384,7 +384,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: AppColors.inputBorderColor,
+                                color: AppColors.contentBorder,
                                 borderRadius: BorderRadius.circular(
                                   16,
                                 ),
@@ -392,9 +392,9 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                               child: Row(
                                 children: [
                                   SizedBox(
-                                    width: 260,
+                                    width: 250,
                                     child: Padding(
-                                      padding: const EdgeInsets.all(4.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Column(
                                         children: [
                                           Row(
@@ -475,13 +475,13 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                             Expanded(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: AppColors.inputBorderColor,
+                                  color: AppColors.contentBorder,
                                   borderRadius: BorderRadius.circular(
                                     16,
                                   ),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(12.0),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment:
@@ -567,10 +567,8 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: AppColors.inputBorderColor,
-                            borderRadius: BorderRadius.circular(
-                              16,
-                            ),
+                            color: AppColors.contentBorder,
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
                             children: [
@@ -591,10 +589,8 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: AppColors.inputBorderColor,
-                            borderRadius: BorderRadius.circular(
-                              16,
-                            ),
+                            color: AppColors.contentBorder,
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
                             children: [
@@ -615,10 +611,8 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: AppColors.inputBorderColor,
-                            borderRadius: BorderRadius.circular(
-                              16,
-                            ),
+                            color: AppColors.contentBorder,
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
                             children: [
@@ -778,33 +772,41 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
   }
 
   Widget buildItem(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.fontColor,
-            ),
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.fontColor.withOpacity(0.8),
+    return Material(
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.fontColor,
+                ),
               ),
-            ),
+              const SizedBox(
+                width: 8,
+              ),
+              Expanded(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.fontColor.withOpacity(0.8),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
