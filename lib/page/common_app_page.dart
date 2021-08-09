@@ -105,9 +105,12 @@ class _AppItemState extends State<AppItem> {
         child: InkWell(
           onTap: handleOnTap,
           onLongPress: () {
-            Get.bottomSheet(AppSettingPage(
-              entity: entity,
-            ));
+            Get.bottomSheet(
+              AppSettingPage(
+                entity: entity,
+              ),
+              isScrollControlled: true,
+            );
             // push(AppSettingPage(
             //   entity: entity,
             // ));

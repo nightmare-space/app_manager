@@ -48,15 +48,17 @@ class _BackupPageState extends State<BackupPage> {
       index++;
       currentApp = entity;
       setState(() {});
-      computeSpeed();
-      Directory('$dataPath').createSync();
+      // computeSpeed();
       backupPath = '$dataPath/${currentApp.appName}.apk';
-      await Global().exec('cp ${currentApp.apkPath} $backupPath');
+      await Global().exec(
+        'mkdir -p $dataPath && cp ${currentApp.apkPath} $backupPath',
+      );
       startBackupData = true;
       setState(() {});
       await Global().exec(
         'tar -zcvf $dataPath/${currentApp.appName}.tar.gz /data/data/${currentApp.packageName}',
       );
+      // 最后一个需要通知结束
     }
   }
 
