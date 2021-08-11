@@ -884,7 +884,7 @@ class _DetailsTabState extends State<DetailsTab> {
               tabs[i],
               style: TextStyle(
                 color: isCheck ? Colors.white : colors[i],
-                fontSize: 18,
+                fontSize: 16.w,
                 fontWeight: FontWeight.bold,
               ),
             ),
