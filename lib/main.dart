@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 
 import 'home.dart';
+import 'routes/app_pages.dart';
 
 //                            _ooOoo_
 //                           o8888888o
@@ -30,7 +31,8 @@ void main() {
   RuntimeEnvir.initEnvirWithPackageName('com.nightmare.appmanager');
   runApp(ToastApp(
     child: GetMaterialApp(
-      home: AppManager(),
+      getPages: AppPages.routes,
+      initialRoute: Routes.home,
     ),
   ));
   // ImageCache().maximumSize=

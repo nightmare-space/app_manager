@@ -97,7 +97,7 @@ class _AppItemState extends State<AppItem> {
     AppEntity entity = widget.entity;
     final check = checkController.check;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
@@ -120,103 +120,34 @@ class _AppItemState extends State<AppItem> {
             //       apps: <AppEntity>[apps[i]],
             //     ));
           },
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Expanded(
-                    child: Row(
-                      children: <Widget>[
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: AppIconHeader(
-                            key: Key(entity.packageName),
-                            packageName: entity.packageName,
-                          ),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: 68,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Expanded(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: AppIconHeader(
+                          key: Key(entity.packageName),
+                          packageName: entity.packageName,
                         ),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                children: [
-                                  Builder(builder: (_) {
-                                    if (widget.filter.isNotEmpty) {
-                                      int index = entity.appName
-                                          .toLowerCase()
-                                          .indexOf(widget.filter);
-                                      if (index != -1) {
-                                        List<int> highlightOffset = [index];
-                                        for (int i = 0;
-                                            i < widget.filter.length - 1;
-                                            i++) {
-                                          highlightOffset
-                                              .add(highlightOffset[i] + 1);
-                                        }
-                                        return RichText(
-                                          text: TextSpan(
-                                            text: '',
-                                            style: const TextStyle(
-                                              color: AppColors.fontColor,
-                                            ),
-                                            children: [
-                                              for (int i = 0;
-                                                  i < entity.appName.length;
-                                                  i++)
-                                                TextSpan(
-                                                  text: entity.appName[i],
-                                                  style: TextStyle(
-                                                    color: highlightOffset
-                                                            .contains(i)
-                                                        ? Theme.of(context)
-                                                            .primaryColor
-                                                        : AppColors.fontColor,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        );
-                                      }
-                                    }
-                                    return Text(
-                                      entity.appName,
-                                      style: const TextStyle(
-                                        color: AppColors.fontColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  }),
-                                  if (entity.freeze)
-                                    const Text(
-                                      '(被冻结)',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        height: 1,
-                                      ),
-                                    ),
-                                  if (entity.hide)
-                                    const Text(
-                                      '(被隐藏)',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        height: 1,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              SingleChildScrollView(
-                                controller: ScrollController(),
-                                scrollDirection: Axis.horizontal,
-                                child: Builder(builder: (_) {
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              children: [
+                                Builder(builder: (_) {
                                   if (widget.filter.isNotEmpty) {
-                                    int index = entity.packageName
+                                    int index = entity.appName
                                         .toLowerCase()
                                         .indexOf(widget.filter);
                                     if (index != -1) {
@@ -235,17 +166,17 @@ class _AppItemState extends State<AppItem> {
                                           ),
                                           children: [
                                             for (int i = 0;
-                                                i < entity.packageName.length;
+                                                i < entity.appName.length;
                                                 i++)
                                               TextSpan(
-                                                text: entity.packageName[i],
+                                                text: entity.appName[i],
                                                 style: TextStyle(
                                                   color: highlightOffset
                                                           .contains(i)
                                                       ? Theme.of(context)
                                                           .primaryColor
-                                                      : AppColors.fontColor
-                                                          .withOpacity(0.8),
+                                                      : AppColors.fontColor,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                           ],
@@ -254,38 +185,104 @@ class _AppItemState extends State<AppItem> {
                                     }
                                   }
                                   return Text(
-                                    entity.packageName,
-                                    style: TextStyle(
-                                      color:
-                                          AppColors.fontColor.withOpacity(0.9),
+                                    entity.appName,
+                                    style: const TextStyle(
+                                      color: AppColors.fontColor,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   );
                                 }),
+                                if (entity.freeze)
+                                  const Text(
+                                    '(被冻结)',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      height: 1,
+                                    ),
+                                  ),
+                                if (entity.hide)
+                                  const Text(
+                                    '(被隐藏)',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      height: 1,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            SingleChildScrollView(
+                              controller: ScrollController(),
+                              scrollDirection: Axis.horizontal,
+                              child: Builder(builder: (_) {
+                                if (widget.filter.isNotEmpty) {
+                                  int index = entity.packageName
+                                      .toLowerCase()
+                                      .indexOf(widget.filter);
+                                  if (index != -1) {
+                                    List<int> highlightOffset = [index];
+                                    for (int i = 0;
+                                        i < widget.filter.length - 1;
+                                        i++) {
+                                      highlightOffset
+                                          .add(highlightOffset[i] + 1);
+                                    }
+                                    return RichText(
+                                      text: TextSpan(
+                                        text: '',
+                                        style: const TextStyle(
+                                          color: AppColors.fontColor,
+                                        ),
+                                        children: [
+                                          for (int i = 0;
+                                              i < entity.packageName.length;
+                                              i++)
+                                            TextSpan(
+                                              text: entity.packageName[i],
+                                              style: TextStyle(
+                                                color: highlightOffset
+                                                        .contains(i)
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : AppColors.fontColor
+                                                        .withOpacity(0.8),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                }
+                                return Text(
+                                  entity.packageName,
+                                  style: TextStyle(
+                                    color: AppColors.fontColor.withOpacity(0.9),
+                                  ),
+                                );
+                              }),
+                            ),
+                            SizedBox(
+                              height: 4,
+                            ),
+                            Text(
+                              '${entity.versionName}(${entity.versionCode})',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.fontColor.withOpacity(0.4),
                               ),
-                              SizedBox(
-                                height: 4,
-                              ),
-                              Text(
-                                '${entity.versionName}(${entity.versionCode})',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.fontColor.withOpacity(0.4),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Checkbox(
-                    value: check.contains(entity),
-                    onChanged: (bool v) {
-                      handleOnTap();
-                    },
-                  )
-                ],
-              ),
+                ),
+                Checkbox(
+                  value: check.contains(entity),
+                  onChanged: (bool v) {
+                    handleOnTap();
+                  },
+                )
+              ],
             ),
           ),
         ),

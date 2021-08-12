@@ -11,6 +11,7 @@ import 'page/common_app_page.dart';
 import 'page/long_press_dialog.dart';
 import 'controller/app_manager_controller.dart';
 import 'controller/check_controller.dart';
+import 'page/mark_page.dart';
 
 class AppManagerWithoutMaterialpp extends StatelessWidget {
   const AppManagerWithoutMaterialpp({Key key}) : super(key: key);
@@ -30,8 +31,6 @@ class AppManager extends StatefulWidget {
     }
     // hide 命令要root
     Global().initProcess();
-    Get.put(AppManagerController());
-    Get.put(CheckController());
     if (RuntimeEnvir.packageName != Config.packageName) {
       // 如果这个项目是独立运行的，那么RuntimeEnvir.packageName会在main函数中被设置成Config.packageName
       Config.flutterPackage = 'packages/app_manager/';
@@ -78,7 +77,7 @@ class _AppManagerState extends State<AppManager>
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
+                  horizontal: 16,
                   vertical: 4,
                 ),
                 child: Row(
@@ -120,6 +119,9 @@ class _AppManagerState extends State<AppManager>
                         ),
                       ),
                     ),
+                    SizedBox(
+                      width: 8.w,
+                    ),
                     NiIconButton(
                       onTap: () {},
                       child: const Icon(Icons.more_vert),
@@ -141,7 +143,7 @@ class _AppManagerState extends State<AppManager>
                         appList: ctl.sysApps,
                         filter: filter.toLowerCase(),
                       ),
-                      Text('暂无'),
+                      MarkPage(),
                       Text('暂无'),
                     ][_currentIndex],
                   );

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 import 'package:path/path.dart' as path;
 
@@ -35,6 +36,7 @@ class _BackupPageState extends State<BackupPage> {
   AppEntity currentApp;
   String backupPath;
   bool startBackupData = false;
+  bool allBackup = false;
 
   @override
   void initState() {
@@ -60,6 +62,8 @@ class _BackupPageState extends State<BackupPage> {
       );
       // 最后一个需要通知结束
     }
+    allBackup = true;
+    setState(() {});
   }
 
   Future<void> computeSpeed() async {
@@ -135,12 +139,22 @@ class _BackupPageState extends State<BackupPage> {
                                 SizedBox(
                                   height: 4,
                                 ),
-                                Text(
-                                  startBackupData ? '正在备份数据' : '正在备份Apk',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                  ),
-                                ),
+                                Builder(builder: (context) {
+                                  if (allBackup) {
+                                    return Text(
+                                      '备份完成',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    );
+                                  }
+                                  return Text(
+                                    startBackupData ? '正在备份数据' : '正在备份Apk',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  );
+                                }),
                               ],
                             ),
                             SizedBox(
@@ -158,6 +172,9 @@ class _BackupPageState extends State<BackupPage> {
                             const BorderRadius.all(Radius.circular(25.0)),
                         child: Builder(
                           builder: (context) {
+                            if (allBackup) {
+                              return SizedBox();
+                            }
                             double value = current / limit;
                             return LinearProgressIndicator(
                               backgroundColor:
@@ -172,7 +189,6 @@ class _BackupPageState extends State<BackupPage> {
                           },
                         ),
                       ),
-                      const SizedBox(height: 4),
                     ],
                   ),
                 ),
@@ -180,21 +196,29 @@ class _BackupPageState extends State<BackupPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 52,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  color: AppColors.contentBorder,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                    child: const Text(
-                  '取消',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+              child: NiCardButton(
+                onTap: () {
+                  Get.back();
+                },
+                child: Container(
+                  height: 52,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    color: allBackup
+                        ? AppColors.accentColor
+                        : AppColors.contentBorder,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                )),
+                  child: Center(
+                      child: Text(
+                    allBackup ? '完成' : '取消',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: allBackup ? Colors.white : AppColors.accentColor,
+                    ),
+                  )),
+                ),
               ),
             ),
           ],

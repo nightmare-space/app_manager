@@ -90,13 +90,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.4"
-  flutter_screenutil:
-    dependency: transitive
-    description:
-      name: flutter_screenutil
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.3.1"
   flutter_spinkit:
     dependency: "direct main"
     description:
