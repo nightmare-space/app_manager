@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:app_manager/global/config.dart';
-import 'package:app_manager/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
