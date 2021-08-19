@@ -8,7 +8,7 @@ part 'app_routes.dart';
 abstract class AppPages {
   static final routes = [
     GetPage(
-      name: Routes.home,
+      name: AppManagerRoutes.home,
       page: () {
         return AppManager();
       },

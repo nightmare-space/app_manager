@@ -32,7 +32,7 @@ void main() {
   runApp(ToastApp(
     child: GetMaterialApp(
       getPages: AppPages.routes,
-      initialRoute: Routes.home,
+      initialRoute: AppManagerRoutes.home,
     ),
   ));
   // ImageCache().maximumSize=

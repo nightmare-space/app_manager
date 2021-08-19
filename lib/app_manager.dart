@@ -1,6 +1,8 @@
 library app_manager;
 
 export 'home.dart';
+export 'routes/app_pages.dart';
+export 'bindings/terminal_binding.dart';
 
 /// A Calculator.
 class Calculator {

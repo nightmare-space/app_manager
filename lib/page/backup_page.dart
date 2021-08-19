@@ -197,18 +197,15 @@ class _BackupPageState extends State<BackupPage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: NiCardButton(
+                color:
+                    allBackup ? AppColors.accentColor : AppColors.contentBorder,
+                borderRadius: 12,
                 onTap: () {
                   Get.back();
                 },
-                child: Container(
+                child: SizedBox(
                   height: 52,
                   width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: allBackup
-                        ? AppColors.accentColor
-                        : AppColors.contentBorder,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                   child: Center(
                       child: Text(
                     allBackup ? '完成' : '取消',

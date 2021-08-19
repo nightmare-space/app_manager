@@ -10,6 +10,7 @@ import 'package:app_manager/model/app_details.dart';
 import 'package:app_manager/model/mark.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/utils/app_utils.dart';
+import 'package:app_manager/utils/plugin_utils.dart';
 import 'package:app_manager/utils/route_extension.dart';
 import 'package:app_manager/widgets/app_icon_header.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 import 'package:path/path.dart' as path;
+import 'package:share_plus/share_plus.dart';
 import 'package:shortcut/shortcut.dart';
 
 import 'backup_sheet.dart';
@@ -247,6 +249,10 @@ class _AppSettingPageState extends State<AppSettingPage> {
                         ));
                         // AppUtils.clearAppData(entity.packageName);
                       }),
+                      buildItem('分享', danger: false, onTap: () {
+                        Get.back();
+                        PluginUtils.shareFile(widget.entity.apkPath);
+                      }),
                     ],
                   ),
                 ),
@@ -323,39 +329,42 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
       return Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              NiIconButton(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Icon(Icons.arrow_back_ios_new),
-              ),
-              buildBody(),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DetailsTab(
-                  value: page,
-                  controller: controller,
-                  onChange: (value) {
-                    page = value;
-                    setState(() {});
-                    controller.animateToPage(
-                      page,
-                      duration: const Duration(
-                        milliseconds: 200,
-                      ),
-                      curve: Curves.ease,
-                    );
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                NiIconButton(
+                  onTap: () {
+                    Navigator.of(context).pop();
                   },
+                  child: const Icon(Icons.arrow_back_ios_new),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
+                buildBody(),
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: DetailsTab(
+                    value: page,
+                    controller: controller,
+                    onChange: (value) {
+                      page = value;
+                      setState(() {});
+                      controller.animateToPage(
+                        page,
+                        duration: const Duration(
+                          milliseconds: 200,
+                        ),
+                        curve: Curves.ease,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -368,7 +377,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
         controller: controller,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            padding: EdgeInsets.symmetric(horizontal: 0),
             child: Builder(builder: (context) {
               AppEntity entity = widget.entity;
               return SingleChildScrollView(
@@ -785,7 +794,10 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
       clipBehavior: Clip.antiAlias,
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: value));
+          showToast('已复制');
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
           child: Row(

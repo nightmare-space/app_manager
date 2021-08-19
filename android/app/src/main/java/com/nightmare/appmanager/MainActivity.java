@@ -14,10 +14,12 @@ import android.graphics.Canvas;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -65,16 +67,16 @@ public class MainActivity extends FlutterActivity {
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "jump").setMethodCallHandler((call, result) -> {
             new Thread(() -> {
                 // try catch 一下
-               try {
-                   List<String> arg = stringToList(call.method);
-                   Intent intent = new Intent();
-                   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                   ComponentName cName = new ComponentName(arg.get(0), arg.get(1));
-                   intent.setComponent(cName);
-                   startActivity(intent);
-               }catch (Exception e){
-                   e.printStackTrace();
-               }
+                try {
+                    List<String> arg = stringToList(call.method);
+                    Intent intent = new Intent();
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    ComponentName cName = new ComponentName(arg.get(0), arg.get(1));
+                    intent.setComponent(cName);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }).start();
         });
     }
@@ -89,6 +91,20 @@ public class MainActivity extends FlutterActivity {
         MethodChannel appChannel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "app_manager");
         appChannel.setMethodCallHandler((call, result) -> new Thread(() -> {
             switch (call.method) {
+                case "shareApk":
+                    String path = (String) call.arguments;
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    File file = new File(path);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        Uri contentUri = FileProvider.getUriForFile(this, "com.nightmare.appmanager" + ".fileprovider", file);
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } else {
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
+                    }
+                    shareIntent.setType("*/*");//此处可发送多种文件
+                    startActivity(Intent.createChooser(shareIntent, "分享到"));
+                    break;
                 case "getAppIcon":
                     String packageName = (String) call.arguments;
                     AppInfo iconInfo = new AppInfo(this);
@@ -99,46 +115,7 @@ public class MainActivity extends FlutterActivity {
                         });
                     }
                     break;
-                case "getAppInfo":
-                    new Thread(() -> {
-                        AppInfo appInfo = new AppInfo(this);
-                        String res = (String) call.arguments;
-                        FileOutputStream fop = null;
-                        File file;
-                        String content = appInfo.getAllAppInfo(res);
 
-                        try {
-
-                            file = new File(this.getFilesDir().getPath()+"/app_info");
-                            fop = new FileOutputStream(file);
-
-                            // if file doesnt exists, then create it
-                            if (!file.exists()) {
-                                file.createNewFile();
-                            }
-                            // get the content in bytes
-                            byte[] contentInBytes = content.getBytes();
-                            fop.write(contentInBytes);
-                            fop.flush();
-                            fop.close();
-                            System.out.println("Done");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            try {
-                                if (fop != null) {
-                                    fop.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        runOnUiThread(() -> {
-                            result.success(null);
-                        });
-                    }).start();
-                    break;
                 case "getMainActivity":
                     try {
                         PackageInfo packages = getPackageManager().getPackageInfo((String) call.arguments, 0);
