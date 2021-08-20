@@ -50,6 +50,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.15.0"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.0.1"
   event_bus:
     dependency: transitive
     description:
@@ -128,6 +135,13 @@ packages:
       relative: false
     source: path
     version: "0.0.1"
+  hive:
+    dependency: "direct main"
+    description:
+      name: hive
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.4"
   js:
     dependency: transitive
     description:

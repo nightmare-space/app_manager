@@ -22,11 +22,11 @@ class _MarkPageState extends State<MarkPage> {
       builder: (context) {
         return ListView.builder(
           controller: _scrollController,
-          itemCount: context.marks.length,
+          itemCount: context.marks.mark.length,
           padding: const EdgeInsets.only(bottom: 60),
           physics: const BouncingScrollPhysics(),
           itemBuilder: (BuildContext c, int i) {
-            Mark mark = context.marks.elementAt(i);
+            Mark mark = context.marks.mark.elementAt(i);
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -64,6 +64,8 @@ class _MarkPageState extends State<MarkPage> {
                       ),
                     ),
                     NiCardButton(
+                      color: Color(0xffe0e0e0),
+                      blurRadius: 0,
                       borderRadius: 20.w,
                       onTap: () {
                         AppUtils.launchActivity(mark.package, mark.component);
@@ -73,6 +75,7 @@ class _MarkPageState extends State<MarkPage> {
                         height: 40.w,
                         child: Icon(
                           Icons.play_arrow_rounded,
+                          color: Colors.black.withOpacity(0.4),
                         ),
                       ),
                     ),
