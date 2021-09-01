@@ -168,11 +168,14 @@ class _AppSettingPageState extends State<AppSettingPage> {
                         Get.back();
                         CheckController checkController = Get.find();
                         if (checkController.check.isEmpty) {
-                          checkController.addCheck(entity);
+                          Get.bottomSheet(BackupSheet(
+                            entitys: [entity],
+                          ));
+                        } else {
+                          Get.bottomSheet(BackupSheet(
+                            entitys: checkController.check,
+                          ));
                         }
-                        Get.bottomSheet(BackupSheet(
-                          entitys: checkController.check,
-                        ));
                         // AppUtils.clearAppData(entity.packageName);
                       }),
                       buildItem('清除App数据', danger: true, onTap: () {

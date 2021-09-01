@@ -45,7 +45,7 @@ class _BackupPageState extends State<BackupPage> {
   }
 
   Future<void> execBackup() async {
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     for (AppEntity entity in widget.entitys) {
       index++;
       currentApp = entity;

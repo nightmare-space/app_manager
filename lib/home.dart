@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 import 'global/global.dart';
+import 'page/backup_list_page.dart';
 import 'page/common_app_page.dart';
 import 'page/long_press_dialog.dart';
 import 'controller/app_manager_controller.dart';
@@ -149,7 +150,7 @@ class _AppManagerState extends State<AppManager>
                         filter: filter.toLowerCase(),
                       ),
                       MarkPage(),
-                      Text('暂无'),
+                      BackupListPage(),
                     ][_currentIndex],
                   );
                 }),

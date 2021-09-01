@@ -1,4 +1,5 @@
 import 'package:app_manager/controller/app_manager_controller.dart';
+import 'package:app_manager/controller/backup_controller.dart';
 import 'package:app_manager/controller/check_controller.dart';
 import 'package:app_manager/controller/mark_controller.dart';
 import 'package:get/get.dart';
@@ -11,5 +12,6 @@ class TerminalBinding extends Bindings {
     Get.put(CheckController());
     Log.w('MarkController inject');
     Get.put(MarkController());
+    Get.put(BackupController());
   }
 }
