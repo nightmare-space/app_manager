@@ -70,7 +70,7 @@ class _LongPressState extends State<LongPress> {
             item('冻结', () async {
               Get.back();
               AppManagerController managerController = Get.find();
-              for (AppEntity entity in controller.check) {
+              for (AppInfo entity in controller.check) {
                 bool success = await AppUtils.freezeApp(entity.packageName);
                 if (success) {
                   entity.freeze = true;
@@ -83,7 +83,7 @@ class _LongPressState extends State<LongPress> {
             item('解冻', () async {
               Get.back();
               AppManagerController managerController = Get.find();
-              for (AppEntity entity in controller.check) {
+              for (AppInfo entity in controller.check) {
                 bool success = await AppUtils.unFreezeApp(entity.packageName);
                 if (success) {
                   entity.freeze = false;

@@ -12,7 +12,7 @@ import 'backup_page.dart';
 
 class BackupSheet extends StatefulWidget {
   const BackupSheet({Key key, this.entitys = const []}) : super(key: key);
-  final List<AppEntity> entitys;
+  final List<AppInfo> entitys;
 
   @override
   _BackupSheetState createState() => _BackupSheetState();

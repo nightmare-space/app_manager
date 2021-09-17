@@ -22,7 +22,7 @@ class BackupPage extends StatefulWidget {
   }) : super(key: key);
   final bool backupApk;
   final bool backupData;
-  final List<AppEntity> entitys;
+  final List<AppInfo> entitys;
 
   @override
   _BackupPageState createState() => _BackupPageState();
@@ -33,7 +33,7 @@ class _BackupPageState extends State<BackupPage> {
   int limit = 1;
   int current = 0;
   int index = 0;
-  AppEntity currentApp;
+  AppInfo currentApp;
   String backupPath;
   bool startBackupData = false;
   bool allBackup = false;
@@ -46,7 +46,7 @@ class _BackupPageState extends State<BackupPage> {
 
   Future<void> execBackup() async {
     await Future.delayed(const Duration(milliseconds: 100));
-    for (AppEntity entity in widget.entitys) {
+    for (AppInfo entity in widget.entitys) {
       index++;
       currentApp = entity;
       setState(() {});

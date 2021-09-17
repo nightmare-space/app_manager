@@ -2,46 +2,12 @@ import 'dart:io';
 
 import 'package:app_manager/global/config.dart';
 import 'package:app_manager/global/global.dart';
+import 'package:app_manager/model/app.dart';
 import 'package:app_manager/utils/socket_util.dart';
 import 'package:flutter/services.dart';
 import 'package:global_repository/global_repository.dart';
 
 const MethodChannel _channel = MethodChannel('app_manager');
-// Future<void> getAppInfoByIsolate(List<String> packages) async {
-//   ReceivePort receivePort = ReceivePort();
-//   await Isolate.spawn(echo, receivePort.sendPort);
-//   Stream<dynamic> stream = receivePort.asBroadcastStream();
-//   // 'echo'发送的第一个message，是它的SendPort
-//   SendPort sendPort;
-//   await for (dynamic msg in stream) {
-//     if (sendPort == null) {
-//       sendPort = msg;
-//       sendPort.send(packages);
-//     } else {
-//       String data = msg;
-//       Log.w('第一个isolate收到消息:$data');
-//     }
-//   }
-// }
-
-// // 新isolate的入口函数
-// echo(SendPort sendPort) async {
-//   // 实例化一个ReceivePort 以接收消息
-//   ReceivePort port = ReceivePort();
-
-//   // 把它的sendPort发送给宿主isolate，以便宿主可以给它发送消息
-//   sendPort.send(port.sendPort);
-
-//   // 监听消息
-//   await for (var msg in port) {
-//     const MethodChannel _channel = MethodChannel('app_manager');
-//     _channel.invokeMethod<String>(
-//       'getAppInfo',
-//       msg,
-//     );
-//     sendPort.send('hello');
-//   }
-// }
 int port = 6000;
 
 class AppUtils {
@@ -49,7 +15,7 @@ class AppUtils {
     return RuntimeEnvir.packageName != Config.packageName;
   }
 
-  static Future<List<String>> getAppInfo(List<String> packages) async {
+  static Future<List<AppInfo>> getAppInfo(List<String> packages) async {
     if (runOnPackage()) {
       port = 6001;
     }
@@ -60,7 +26,21 @@ class AppUtils {
     manager.sendMsg('getAllAppInfo ' + packages.join(' ') + '\n');
     final List<String> infos = (await manager.getString()).split('\n');
     infos.removeLast();
-    return infos;
+    // Log.e('infos -> $infos');
+    final List<AppInfo> entitys = <AppInfo>[];
+    for (int i = 0; i < infos.length; i++) {
+      List<String> infoList = infos[i].split('\r');
+      final AppInfo appInfo = AppInfo(
+        packages[i],
+        appName: infoList[0],
+        minSdk: infoList[1],
+        targetSdk: infoList[2],
+        versionCode: infoList[4],
+        versionName: infoList[3],
+      );
+      entitys.add(appInfo);
+    }
+    return entitys;
   }
 
   static Future<String> getAppDetails(String package) async {
@@ -113,20 +93,40 @@ class AppUtils {
     await manager.connect();
     manager.sendMsg('getIconData ' '$packageName\n');
     List<int> result = await manager.getResult();
+
     // Log.w(result);
     return result;
   }
 
-  static Future<List<int>> getAllAppIconBytes(List<String> packages) async {
+  static Future<List<List<int>>> getAllAppIconBytes(
+      List<String> packages) async {
     if (runOnPackage()) {
       port = 6001;
     }
     SocketWrapper manager = SocketWrapper(InternetAddress.anyIPv4, port);
     await manager.connect();
     manager.sendMsg('getAllIconData ' + packages.join(' ') + '\n');
-    List<int> result = await manager.getResult();
+    List<int> allBytes = await manager.getResult();
+    List<List<int>> byteList = [];
+    byteList.length = packages.length;
+    int index = 0;
+    for (int i = 0; i < allBytes.length; i++) {
+      byteList[index] ??= [];
+      byteList[index].add(allBytes[i]);
+      if (i < allBytes.length - 1 - 6 &&
+          allBytes[i + 1] == 137 &&
+          allBytes[i + 2] == 80 &&
+          allBytes[i + 3] == 78 &&
+          allBytes[i + 4] == 71 &&
+          allBytes[i + 5] == 13 &&
+          allBytes[i + 6] == 10 &&
+          i != 0) {
+        index++;
+        // Log.w('缓存第$index个包名的');
+      }
+    }
     // Log.w(result);
-    return result;
+    return byteList;
   }
 
   static Future<String> getAppMainActivity(String packageName) async {

@@ -15,7 +15,7 @@ class CommonAppPage extends StatefulWidget {
     this.appList = const [],
     this.filter,
   }) : super(key: key);
-  final List<AppEntity> appList;
+  final List<AppInfo> appList;
   final String filter;
   @override
   CommonAppPageState createState() => CommonAppPageState();
@@ -36,7 +36,7 @@ class CommonAppPageState extends State<CommonAppPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<AppEntity> apps = List.from(widget.appList);
+    List<AppInfo> apps = List.from(widget.appList);
     if (apps.isEmpty) {
       return const SpinKitThreeBounce(
         color: AppColors.accentColor,
@@ -71,7 +71,7 @@ class AppItem extends StatefulWidget {
     this.entity,
     this.filter,
   }) : super(key: key);
-  final AppEntity entity;
+  final AppInfo entity;
   final String filter;
 
   @override
@@ -82,7 +82,7 @@ class _AppItemState extends State<AppItem> {
   AppManagerController controller = Get.find();
   CheckController checkController = Get.find();
   handleOnTap() {
-    AppEntity entity = widget.entity;
+    AppInfo entity = widget.entity;
     final check = checkController.check;
     if (check.contains(entity)) {
       checkController.removeCheck(entity);
@@ -94,7 +94,7 @@ class _AppItemState extends State<AppItem> {
 
   @override
   Widget build(BuildContext context) {
-    AppEntity entity = widget.entity;
+    AppInfo entity = widget.entity;
     final check = checkController.check;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),

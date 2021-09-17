@@ -29,7 +29,7 @@ class AppSettingPage extends StatefulWidget {
     Key key,
     @required this.entity,
   }) : super(key: key);
-  final AppEntity entity;
+  final AppInfo entity;
 
   @override
   _AppSettingPageState createState() => _AppSettingPageState();
@@ -99,7 +99,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    AppEntity entity = widget.entity;
+    AppInfo entity = widget.entity;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -299,7 +299,7 @@ class AppInfoDetailPage extends StatefulWidget {
     key,
     this.entity,
   }) : super(key: key);
-  final AppEntity entity;
+  final AppInfo entity;
 
   @override
   _AppInfoDetailPageState createState() => _AppInfoDetailPageState();
@@ -381,7 +381,7 @@ class _AppInfoDetailPageState extends State<AppInfoDetailPage> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 0),
             child: Builder(builder: (context) {
-              AppEntity entity = widget.entity;
+              AppInfo entity = widget.entity;
               return SingleChildScrollView(
                 padding: EdgeInsets.zero,
                 physics: BouncingScrollPhysics(),

@@ -2,14 +2,14 @@ import 'package:app_manager/model/app.dart';
 import 'package:get/get.dart';
 
 class CheckController extends GetxController {
-  List<AppEntity> check = [];
+  List<AppInfo> check = [];
 
-  void addCheck(AppEntity entity) {
+  void addCheck(AppInfo entity) {
     check.add(entity);
     update();
   }
 
-  void removeCheck(AppEntity entity) {
+  void removeCheck(AppInfo entity) {
     check.remove(entity);
     update();
   }

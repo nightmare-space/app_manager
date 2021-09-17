@@ -8,17 +8,17 @@ import 'package:global_repository/global_repository.dart';
 
 class AppManagerController extends GetxController {
   //用户应用
-  List<AppEntity> _userApps = <AppEntity>[];
+  List<AppInfo> _userApps = <AppInfo>[];
   //系统应用
-  List<AppEntity> _sysApps = <AppEntity>[];
-  List<AppEntity> get userApps => _userApps;
-  List<AppEntity> get sysApps => _sysApps;
+  List<AppInfo> _sysApps = <AppInfo>[];
+  List<AppInfo> get userApps => _userApps;
+  List<AppInfo> get sysApps => _sysApps;
 
   Future<void> getUserApp() async {
     //拿到应用软件List
     Stopwatch watch = Stopwatch();
     watch.start();
-    final List<AppEntity> entitys = <AppEntity>[];
+    final List<AppInfo> entitys = <AppInfo>[];
 
     String defaultAppsResult = await Global().exec('pm list package -3 -f -U');
     Log.e('watch -> ${watch.elapsed}');
@@ -45,8 +45,12 @@ class AppManagerController extends GetxController {
         hide = true;
       }
       // Log.w('包名 -> $packageName apkPath -> $apkPath');
-      entitys.add(
-          AppEntity(packageName, '', apkPath: apkPath, uid: uid, hide: hide));
+      entitys.add(AppInfo(
+        packageName,
+        apkPath: apkPath,
+        uid: uid,
+        hide: hide,
+      ));
     }
     Log.e('disableApp -> ${watch.elapsed}');
     String disableApp = await Global().exec('pm list package -3 -d');
@@ -61,24 +65,18 @@ class AppManagerController extends GetxController {
     for (int i = 0; i < disableAppList.length; i++) {
       String packageName = disableAppList[i];
       // Log.w('包名 -> $packageName apkPath -> $apkPath');
-      AppEntity entity =
+      AppInfo entity =
           entitys.firstWhere((element) => element.packageName == packageName);
       entity.freeze = true;
     }
     Log.e('watch -> ${watch.elapsed}');
-    final List<String> infos = await AppUtils.getAppInfo(packages);
+    final List<AppInfo> infos = await AppUtils.getAppInfo(packages);
     Log.e('watch -> ${watch.elapsed}');
     if (infos.isEmpty) {
       return;
     }
-    // Log.e('infos -> $infos');
     for (int i = 0; i < infos.length; i++) {
-      List<String> infoList = infos[i].split('\r');
-      entitys[i].appName = infoList[0];
-      entitys[i].minSdk = infoList[1];
-      entitys[i].targetSdk = infoList[2];
-      entitys[i].versionName = infoList[3];
-      entitys[i].versionCode = infoList[4];
+      entitys[i] = entitys[i].copyWith(infos[i]);
     }
     entitys.sort(
         (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
@@ -92,7 +90,7 @@ class AppManagerController extends GetxController {
   }
 
   Future<void> cacheUserIcons() async {
-    for (AppEntity entity in _userApps) {
+    for (AppInfo entity in _userApps) {
       // Log.i('缓存 ${entity.packageName} 图标');
       // if (IconStore().loadCache(entity.packageName).isEmpty) {
       File cacheFile = File(
@@ -113,33 +111,18 @@ class AppManagerController extends GetxController {
   // 根据文件头将一维数组缓拆分成二维数组
   Future<void> cacheAllUserIcons(List<String> packages) async {
     // 所有图
-    List<int> allBytes = await AppUtils.getAllAppIconBytes(packages);
+    final List<List<int>> byteList =
+        await AppUtils.getAllAppIconBytes(packages);
     // Log.e('allBytes -> $allBytes');
-    if (allBytes.isEmpty) {
+    if (byteList.isEmpty) {
       return;
     }
     Log.w('缓存全部...');
-    List<List<int>> byteList = [];
-    byteList.length = packages.length;
-    int index = 0;
-    for (int i = 0; i < allBytes.length; i++) {
-      byteList[index] ??= [];
-      byteList[index].add(allBytes[i]);
-      if (i < allBytes.length - 1 - 6 &&
-          allBytes[i + 1] == 137 &&
-          allBytes[i + 2] == 80 &&
-          allBytes[i + 3] == 78 &&
-          allBytes[i + 4] == 71 &&
-          allBytes[i + 5] == 13 &&
-          allBytes[i + 6] == 10 &&
-          i != 0) {
-        index++;
-        // Log.w('缓存第$index个包名的');
-      }
-    }
+
     for (int i = 0; i < packages.length; i++) {
-      File cacheFile =
-          File(RuntimeEnvir.filesPath + '/AppManager/.icon/${packages[i]}');
+      String cachePath =
+          '${RuntimeEnvir.filesPath}/AppManager/.icon/${packages[i]}';
+      File cacheFile = File(cachePath);
       if (!(await cacheFile.exists())) {
         await cacheFile.writeAsBytes(
           byteList[i],
@@ -160,7 +143,7 @@ class AppManagerController extends GetxController {
 
   Future<void> getSysApp() async {
     //拿到应用软件List
-    final List<AppEntity> entitys = <AppEntity>[];
+    final List<AppInfo> entitys = <AppInfo>[];
 
     final List<String> resultList =
         (await Global().exec('pm list package -s -f -U'))
@@ -178,28 +161,28 @@ class AppManagerController extends GetxController {
       String apkPath = resultList[i].replaceAll('=$packageName uid:$uid', '');
       packages.add(packageName);
       // Log.w('包名 -> $packageName apkPath -> $apkPath');
-      entitys.add(AppEntity(packageName, '', apkPath: apkPath, uid: uid));
+      entitys.add(AppInfo(packageName, apkPath: apkPath, uid: uid));
     }
-    final List<String> infos = await AppUtils.getAppInfo(packages);
+    // final List<String> infos = await AppUtils.getAppInfo(packages);
 
-    for (int i = 0; i < infos.length; i++) {
-      List<String> infoList = infos[i].split('\r');
-      entitys[i].appName = infoList[0];
-      entitys[i].minSdk = infoList[1];
-      entitys[i].targetSdk = infoList[2];
-      entitys[i].versionName = infoList[3];
-      entitys[i].versionCode = infoList[4];
-    }
-    entitys.sort(
-        (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
-    // saveImg(yylist);
-    // Log.e(await Global().process.exec('pm list package -3 -f'));
-    _sysApps = entitys;
-    // cacheSysIcons();
-    update();
+    // for (int i = 0; i < infos.length; i++) {
+    //   List<String> infoList = infos[i].split('\r');
+    //   entitys[i].appName = infoList[0];
+    //   entitys[i].minSdk = infoList[1];
+    //   entitys[i].targetSdk = infoList[2];
+    //   entitys[i].versionName = infoList[3];
+    //   entitys[i].versionCode = infoList[4];
+    // }
+    // entitys.sort(
+    //     (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
+    // // saveImg(yylist);
+    // // Log.e(await Global().process.exec('pm list package -3 -f'));
+    // _sysApps = entitys;
+    // // cacheSysIcons();
+    // update();
   }
 
-  void removeEntity(AppEntity entity) {
+  void removeEntity(AppInfo entity) {
     if (_userApps.contains(entity)) {
       _userApps.remove(entity);
     }
