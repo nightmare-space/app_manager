@@ -5,10 +5,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-const int msgByteLen = 2;
-const int msgCodeByteLen = 2;
-const int minMsgByteLen = msgByteLen + msgCodeByteLen;
-
 class SocketWrapper {
   SocketWrapper(this.address, this.port);
   final dynamic address;
@@ -27,11 +23,32 @@ class SocketWrapper {
           seconds: 3,
         ),
       );
+
       mStream = socket.asBroadcastStream();
       return true;
     } catch (e) {
       debugPrint('连接socket出现异常，e=${e.toString()}');
       return false;
+    }
+  }
+
+  Future<SocketWrapper> bind() async {
+    try {
+      ServerSocket serverSocket = await ServerSocket.bind(
+        address,
+        port,
+      );
+      Completer lock = Completer();
+      serverSocket.listen((event) {
+        socket = event;
+        mStream = event.asBroadcastStream();
+        lock.complete();
+      });
+      await lock.future;
+      return this;
+    } catch (e) {
+      debugPrint('连接socket出现异常，e=${e.toString()}');
+      return null;
     }
   }
 
