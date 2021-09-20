@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:global_repository/global_repository.dart';
 
 class SocketWrapper {
   SocketWrapper(this.address, this.port);
@@ -37,14 +38,17 @@ class SocketWrapper {
       ServerSocket serverSocket = await ServerSocket.bind(
         address,
         port,
+        shared: true,
       );
       Completer lock = Completer();
       serverSocket.listen((event) {
+        Log.w('连接成功 ${event.address.address} ${event.port}');
         socket = event;
         mStream = event.asBroadcastStream();
         lock.complete();
       });
       await lock.future;
+      serverSocket.close();
       return this;
     } catch (e) {
       debugPrint('连接socket出现异常，e=${e.toString()}');
@@ -70,7 +74,6 @@ class SocketWrapper {
     List<int> tmp = [];
     mStream.listen((event) {
       tmp.addAll(event);
-      // Log.e(event);
     }, onDone: () {
       // Log.w('stream down');
       completer.complete(utf8.decode(tmp));
