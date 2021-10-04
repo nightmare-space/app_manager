@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:app_manager/global/global.dart';
 import 'package:app_manager/model/backup.dart';
@@ -30,6 +31,7 @@ class BackupController extends GetxController {
   void saveToLocal() {}
 
   Future<void> getLocalData() async {
+    Directory(backupPath).createSync(recursive: true);
     String lsResult = await Global().exec(' su -c "ls $backupPath | grep .gz"');
     Log.e('lsResult -> $lsResult');
     for (final String line in lsResult.split('\n')) {

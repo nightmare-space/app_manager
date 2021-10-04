@@ -49,6 +49,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
   }
 
   Future<String> getFileSize(String path) async {
+    return '123';
     return await Global().exec('stat -c "%s" $path');
   }
 
@@ -74,6 +75,7 @@ class _AppSettingPageState extends State<AppSettingPage> {
     }
 
     details.apkSize = await getFileSize(widget.entity.apkPath);
+    Log.w('apkSize -> ${details.apkSize}}');
     String md5 = await Global().exec('md5sum ${widget.entity.apkPath}');
     md5 = md5.replaceAll(RegExp(' .*'), '');
     String sha1 = await Global().exec('sha1sum ${widget.entity.apkPath}');

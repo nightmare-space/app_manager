@@ -27,7 +27,13 @@ class AppInfo {
   AppDetails details;
 
   AppInfo copyWith(AppInfo other) {
-    AppInfo appEntity = AppInfo(packageName);
+    AppInfo appEntity = AppInfo(
+      packageName,
+      apkPath: apkPath,
+      uid: uid,
+      freeze: freeze,
+      hide: hide,
+    );
     appEntity.appName = other.appName;
     appEntity.minSdk = other.minSdk;
     appEntity.targetSdk = other.targetSdk;

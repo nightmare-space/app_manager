@@ -66,7 +66,7 @@ class _AppManagerState extends State<AppManager>
     }
     await Directory(workDir.path + '/.icon').create();
     appManagerProvider.getUserApp();
-    appManagerProvider.getSysApp();
+    // appManagerProvider.getSysApp();
   }
 
   AppManagerController appManagerProvider = Get.find();

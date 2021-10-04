@@ -29,3 +29,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    
+dependency_overrides:
+  global_repository:
+    path: /Users/nightmare/Desktop/nightmare-space/global_repository

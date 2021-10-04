@@ -15,16 +15,18 @@ class AppManagerController extends GetxController {
   List<AppInfo> get sysApps => _sysApps;
 
   Future<void> getUserApp() async {
+    Log.w('getUserApp');
     //拿到应用软件List
     Stopwatch watch = Stopwatch();
     watch.start();
     final List<AppInfo> entitys = <AppInfo>[];
 
+    Log.e('watch -> ${watch.elapsed}');
     String defaultAppsResult = await Global().exec('pm list package -3 -f -U');
     Log.e('watch -> ${watch.elapsed}');
     defaultAppsResult = defaultAppsResult.replaceAll(RegExp('package:'), '');
     final List<String> defaultAppsList = defaultAppsResult.split('\n');
-    // Log.e(defaultAppsList);
+    Log.e(defaultAppsList);
     String result = await Global().exec('pm list package -3 -u -f -U');
     Log.e('watch -> ${watch.elapsed}');
     result = result.replaceAll(RegExp('package:'), '');
@@ -56,7 +58,7 @@ class AppManagerController extends GetxController {
     String disableApp = await Global().exec('pm list package -3 -d');
     Log.e('disableApp -> ${watch.elapsed}');
     disableApp = disableApp.replaceAll(RegExp('package:'), '');
-    // Log.e("disableApp -> $disableApp");
+    Log.e("disableApp -> $disableApp");
     final List<String> disableAppList = [];
     if (disableApp.isNotEmpty) {
       // 有可能一个冻结的应用都没有
@@ -65,9 +67,11 @@ class AppManagerController extends GetxController {
     for (int i = 0; i < disableAppList.length; i++) {
       String packageName = disableAppList[i];
       // Log.w('包名 -> $packageName apkPath -> $apkPath');
-      AppInfo entity =
-          entitys.firstWhere((element) => element.packageName == packageName);
-      entity.freeze = true;
+      AppInfo entity;
+      try {
+        entitys.firstWhere((element) => element.packageName == packageName);
+        entity.freeze = true;
+      } catch (e) {}
     }
     Log.e('watch -> ${watch.elapsed}');
     final List<AppInfo> infos = await AppUtils.getAppInfo(packages);
@@ -163,23 +167,20 @@ class AppManagerController extends GetxController {
       // Log.w('包名 -> $packageName apkPath -> $apkPath');
       entitys.add(AppInfo(packageName, apkPath: apkPath, uid: uid));
     }
-    // final List<String> infos = await AppUtils.getAppInfo(packages);
-
-    // for (int i = 0; i < infos.length; i++) {
-    //   List<String> infoList = infos[i].split('\r');
-    //   entitys[i].appName = infoList[0];
-    //   entitys[i].minSdk = infoList[1];
-    //   entitys[i].targetSdk = infoList[2];
-    //   entitys[i].versionName = infoList[3];
-    //   entitys[i].versionCode = infoList[4];
-    // }
-    // entitys.sort(
-    //     (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
-    // // saveImg(yylist);
-    // // Log.e(await Global().process.exec('pm list package -3 -f'));
-    // _sysApps = entitys;
-    // // cacheSysIcons();
-    // update();
+    final List<AppInfo> infos = await AppUtils.getAppInfo(packages);
+    if (infos.isEmpty) {
+      return;
+    }
+    for (int i = 0; i < infos.length; i++) {
+      entitys[i] = entitys[i].copyWith(infos[i]);
+    }
+    entitys.sort(
+        (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
+    // saveImg(yylist);
+    // Log.e(await Global().process.exec('pm list package -3 -f'));
+    _sysApps = entitys;
+    // cacheSysIcons();
+    update();
   }
 
   void removeEntity(AppInfo entity) {
