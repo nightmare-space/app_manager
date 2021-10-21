@@ -1,5 +1,6 @@
 package com.nightmare.appmanager;
 
+import android.annotation.SuppressLint;
 import android.content.*;
 import android.content.pm.*;
 import android.graphics.Bitmap;
@@ -26,13 +27,13 @@ import java.util.List;
  * Created by Nightmare on 2021/7/29.
  */
 
-public class AppInfo {
+public class AppChannel {
     Context context;
     PackageManager pm;
 
     static final String SOCKET_NAME = "app_manager";
 
-    public AppInfo(Context context) {
+    public AppChannel(Context context) {
         this.context = context;
         pm = context.getPackageManager();
     }
@@ -49,10 +50,12 @@ public class AppInfo {
 
     public static void main(String[] arg) throws Exception {
         Looper.prepareMainLooper();
+        @SuppressLint("PrivateApi")
         Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
         Constructor<?> activityThreadConstructor = activityThreadClass.getDeclaredConstructor();
         activityThreadConstructor.setAccessible(true);
         Object activityThread = activityThreadConstructor.newInstance();
+        @SuppressLint("DiscouragedPrivateApi")
         Method getSystemContextMethod = activityThreadClass.getDeclaredMethod("getSystemContext");
         Context ctx = (Context) getSystemContextMethod.invoke(activityThread);
         new Thread(() -> {
@@ -64,7 +67,8 @@ public class AppInfo {
         }).start();
         System.out.println("wait");
         System.out.flush();
-        System.in.read();
+        // 不能让进程退了
+        int placeholder = System.in.read();
 
     }
 
@@ -80,40 +84,47 @@ public class AppInfo {
             OutputStream os = socket.getOutputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String data = br.readLine();
-            String type = data.replaceAll(" .*", "");
-            AppInfo appInfo = new AppInfo(context);
+            String type = data.replaceAll(":.*", ":");
+            AppChannel appInfo = new AppChannel(context);
             switch (type) {
-                case "getIconData":
+                case AppChannelProtocol.getIconData:
                     System.out.println("响应Icon信息");
                     System.out.flush();
-                    Log.d("nightmare", "响应Icon信息");
-                    handleIcon(os, context, data.replace("getIconData ", ""));
+                    Log.d("Nightmare", "响应Icon信息");
+                    handleIcon(os, context, data.replace(AppChannelProtocol.getIconData, ""));
                     break;
-                case "getAllAppInfo":
-                    System.out.println("响应AppInfo");
+                case AppChannelProtocol.getAllAppInfo:
+                    System.out.println("响应AllAppInfo");
+                    Log.d("Nightmare", "响应AllAppInfo");
                     System.out.flush();
-                    handleAllAppInfo(os, context, data.replace("getAllAppInfo ", ""));
+                    handleAllAppInfo(os, context, data.replace(AppChannelProtocol.getAllAppInfo, ""));
                     break;
-                case "getAllIconData":
+                case AppChannelProtocol.getAllIconData:
                     System.out.println("响应AllAppIcon");
                     System.out.flush();
-                    handleAllAppIcon(os, context, data.replace("getAllIconData ", ""));
+                    handleAllAppIcon(os, context, data.replace(AppChannelProtocol.getAllIconData, ""));
                     break;
-                case "getAppActivity":
+                case AppChannelProtocol.getAppActivity:
                     System.out.println("响应getAppActivity");
                     System.out.flush();
-                    os.write(appInfo.getAppActivitys(data.replace("getAppActivity ", "")).getBytes());
-                case "getAppPermissions":
+                    os.write(appInfo.getAppActivitys(data.replace(AppChannelProtocol.getAppActivity, "")).getBytes());
+                case AppChannelProtocol.getAppPermissions:
                     System.out.println("响应getAppPermissions");
                     System.out.flush();
-                    os.write(appInfo.getAppPermissions(data.replace("getAppPermissions ", "")).getBytes());
+                    os.write(appInfo.getAppPermissions(data.replace(AppChannelProtocol.getAppPermissions, "")).getBytes());
                     break;
-                case "getAppDetail":
+                case AppChannelProtocol.getAppDetail:
                     System.out.println("响应getAppDetail");
                     System.out.flush();
-                    os.write(appInfo.getAppDetail(data.replace("getAppDetail ", "")).getBytes());
+                    os.write(appInfo.getAppDetail(data.replace(AppChannelProtocol.getAppDetail, "")).getBytes());
+                    break;
+                case AppChannelProtocol.getAppMainActivity:
+                    System.out.println("响应getAppMainActivity");
+                    System.out.flush();
+                    os.write(appInfo.getAppMainActivity(data.replace(AppChannelProtocol.getAppMainActivity, "")).getBytes());
                     break;
                 default:
+                    socket.close();
                     return;
             }
             socket.setReuseAddress(true);
@@ -123,13 +134,13 @@ public class AppInfo {
 
     public static void handleIcon(OutputStream outputStream, Context context, String packageName) throws IOException {
         System.out.println("包名:" + packageName);
-        AppInfo appInfo = new AppInfo(context);
+        AppChannel appInfo = new AppChannel(context);
         outputStream.write(appInfo.getBitmapBytes(packageName));
     }
 
     public static void handleAllAppIcon(OutputStream outputStream, Context context, String data) throws IOException {
         List<String> id = stringToList(data);
-        AppInfo appInfo = new AppInfo(context);
+        AppChannel appInfo = new AppChannel(context);
         for (String packageName : id) {
             outputStream.write(appInfo.getBitmapBytes(packageName));
             outputStream.flush();
@@ -138,7 +149,7 @@ public class AppInfo {
 
 
     public static void handleAllAppInfo(OutputStream outputStream, Context context, String data) throws IOException {
-        AppInfo appInfo = new AppInfo(context);
+        AppChannel appInfo = new AppChannel(context);
         outputStream.write(appInfo.getAllAppInfo(data).getBytes());
     }
 
@@ -207,6 +218,22 @@ public class AppInfo {
         }
         return builder.toString();
 
+    }
+
+    public String getAppMainActivity(String packageName) {
+        StringBuilder builder = new StringBuilder();
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> appList = context.getPackageManager().queryIntentActivities(mainIntent, 0);
+        for (int i = 0; i < appList.size(); i++) {
+            ResolveInfo resolveInfo = appList.get(i);
+            String packageStr = resolveInfo.activityInfo.packageName;
+            if (packageStr.equals(packageName)) {
+                builder.append(resolveInfo.activityInfo.name).append("\n");
+                break;
+            }
+        }
+        return builder.toString();
     }
 
     public String getAppDetail(String data) {

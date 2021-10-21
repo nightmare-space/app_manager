@@ -1,32 +1,14 @@
 package com.nightmare.appmanager;
 
-import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.AdaptiveIconDrawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,8 +16,6 @@ import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-
-import static com.nightmare.appmanager.AppInfo.Bitmap2Bytes;
 
 public class MainActivity extends FlutterActivity {
 
@@ -54,7 +34,7 @@ public class MainActivity extends FlutterActivity {
 
         new Thread(() -> {
             try {
-                AppInfo.startServer(getApplicationContext());
+                AppChannel.startServer(getApplicationContext());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -105,43 +85,7 @@ public class MainActivity extends FlutterActivity {
                     shareIntent.setType("*/*");//此处可发送多种文件
                     startActivity(Intent.createChooser(shareIntent, "分享到"));
                     break;
-                case "getAppIcon":
-                    String packageName = (String) call.arguments;
-                    AppInfo iconInfo = new AppInfo(this);
-                    byte[] bytes = iconInfo.getBitmapBytes(packageName);
-                    if (bytes.length != 0) {
-                        runOnUiThread(() -> {
-                            result.success(bytes);
-                        });
-                    }
-                    break;
 
-                case "getMainActivity":
-                    try {
-                        PackageInfo packages = getPackageManager().getPackageInfo((String) call.arguments, 0);
-                        StringBuilder builder = new StringBuilder();
-//                if(actInfo!=null)
-//                for (ActivityInfo a : actInfo) {
-//                    list.append(a.name).append("\n");
-//                }
-                        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-                        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-                        @SuppressLint("QueryPermissionsNeeded")
-                        List<ResolveInfo> appList = getPackageManager().queryIntentActivities(mainIntent, 0);
-                        for (int i = 0; i < appList.size(); i++) {
-                            ResolveInfo resolveInfo = appList.get(i);
-                            String packageStr = resolveInfo.activityInfo.packageName;
-                            if (packageStr.equals((String) call.arguments)) {
-                                //这个就是你想要的那个Activity
-                                builder.append(resolveInfo.activityInfo.name).append("\n");
-                                break;
-                            }
-                        }
-                        runOnUiThread(() -> result.success(builder.toString()));
-                    } catch (PackageManager.NameNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    break;
             }
         }).start());
     }
