@@ -6,6 +6,17 @@ import 'package:app_manager/utils/app_utils.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 
+List<String> parsePMOut(String out) {
+  String tmp = out.replaceAll(RegExp('package:'), '');
+  return tmp.split('\n');
+}
+
+/// pm 命令
+/// -U 显示 uid
+/// -f 显示相关路径
+/// -3 显示三方app
+/// -u 显示已卸载的app
+/// -d 只显示被禁用的app
 class AppManagerController extends GetxController {
   //用户应用
   List<AppInfo> _userApps = <AppInfo>[];
@@ -21,19 +32,17 @@ class AppManagerController extends GetxController {
     watch.start();
     final List<AppInfo> entitys = <AppInfo>[];
 
-    Log.e('watch -> ${watch.elapsed}');
+    // 获取三方应用 -
     String defaultAppsResult = await Global().exec('pm list package -3 -f -U');
-    Log.e('watch -> ${watch.elapsed}');
-    defaultAppsResult = defaultAppsResult.replaceAll(RegExp('package:'), '');
-    final List<String> defaultAppsList = defaultAppsResult.split('\n');
-    Log.e(defaultAppsList);
+    Log.e('defaultAppsResult -> $defaultAppsResult');
+    final List<String> defaultAppsList = parsePMOut(defaultAppsResult);
+    // 这个比上面那个显示得更多，多显示被隐藏的app列表
     String result = await Global().exec('pm list package -3 -u -f -U');
     Log.e('watch -> ${watch.elapsed}');
-    result = result.replaceAll(RegExp('package:'), '');
-    final List<String> resultList = result.split('\n');
-    // 获取第三方的冻结应用
-
+    final List<String> resultList = parsePMOut(result);
     final List<String> packages = [];
+
+    // 这个循环解析出被隐藏的app信息
     for (int i = 0; i < resultList.length; i++) {
       String uid = resultList[i].replaceAll(RegExp('.*uid:'), '');
       String packageName = resultList[i].replaceAll(
@@ -43,10 +52,94 @@ class AppManagerController extends GetxController {
       String apkPath = resultList[i].replaceAll('=$packageName uid:$uid', '');
       packages.add(packageName);
       bool hide = false;
-      if (!defaultAppsList.contains(resultList[i])) {
+      // 如果所有的app里面没有这个app
+      // 说明这个app是被隐藏的
+      if (defaultAppsResult.isNotEmpty &&
+          !defaultAppsList.contains(resultList[i])) {
+        Log.e('packageName -> $packageName ${resultList[i]}');
         hide = true;
       }
-      // Log.w('包名 -> $packageName apkPath -> $apkPath');
+      entitys.add(AppInfo(
+        packageName,
+        apkPath: apkPath,
+        uid: uid,
+        hide: hide,
+      ));
+    }
+    // 获取三方被禁用(冻结)的app
+    String disableApp = await Global().exec('pm list package -3 -d');
+    List<String> disableAppList;
+    if (disableApp.isNotEmpty) {
+      // 有可能一个冻结的应用都没有
+      disableAppList = parsePMOut(disableApp);
+      Log.e('disableApp -> $disableAppList');
+    }
+    for (int i = 0; i < disableAppList.length; i++) {
+      String packageName = disableAppList[i];
+
+      try {
+        // 如果
+        AppInfo entity =
+            entitys.firstWhere((element) => element.packageName == packageName);
+        Log.w('entity -> $entity');
+        entity.freeze = true;
+      } catch (e) {
+        // pass
+      }
+    }
+    final List<AppInfo> infos = await Global().appChannel.getAppInfo(packages);
+    if (infos.isEmpty) {
+      return;
+    }
+    for (int i = 0; i < infos.length; i++) {
+      entitys[i] = entitys[i].copyWith(infos[i]);
+    }
+    entitys.sort(
+      (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()),
+    );
+    _userApps = entitys;
+    update();
+    cacheAllUserIcons(packages);
+
+    Log.w('_userApps length -> ${_userApps.length}');
+  }
+
+  Future<void> getSysApp() async {
+    //拿到应用软件List
+
+    Log.w('getUserApp');
+    //拿到应用软件List
+    Stopwatch watch = Stopwatch();
+    watch.start();
+    final List<AppInfo> entitys = <AppInfo>[];
+
+    Log.e('watch -> ${watch.elapsed}');
+    // 获取三方应用 -
+    String defaultAppsResult = await Global().exec('pm list package -s -f -U');
+    Log.e('watch -> ${watch.elapsed}');
+    final List<String> defaultAppsList = parsePMOut(defaultAppsResult);
+    // 这个比上面那个显示得更多，多显示被隐藏的app列表
+    String result = await Global().exec('pm list package -s -u -f -U');
+    Log.e('watch -> ${watch.elapsed}');
+    final List<String> resultList = parsePMOut(result);
+    final List<String> packages = [];
+
+    // 这个循环解析出被隐藏的app信息
+    for (int i = 0; i < resultList.length; i++) {
+      String uid = resultList[i].replaceAll(RegExp('.*uid:'), '');
+      String packageName = resultList[i].replaceAll(
+        RegExp('.*=| uid:$uid'),
+        '',
+      );
+      String apkPath = resultList[i].replaceAll('=$packageName uid:$uid', '');
+      packages.add(packageName);
+      bool hide = false;
+      // 如果所有的app里面没有这个app
+      // 说明这个app是被隐藏的
+      if (defaultAppsResult.isNotEmpty &&
+          !defaultAppsList.contains(resultList[i])) {
+        hide = true;
+      }
       entitys.add(AppInfo(
         packageName,
         apkPath: apkPath,
@@ -55,27 +148,25 @@ class AppManagerController extends GetxController {
       ));
     }
     Log.e('disableApp -> ${watch.elapsed}');
-    String disableApp = await Global().exec('pm list package -3 -d');
-    Log.e('disableApp -> ${watch.elapsed}');
-    disableApp = disableApp.replaceAll(RegExp('package:'), '');
-    Log.e("disableApp -> $disableApp");
-    final List<String> disableAppList = [];
+    // 获取三方被禁用(冻结)的app
+    String disableApp = await Global().exec('pm list package -s -d');
+    List<String> disableAppList;
     if (disableApp.isNotEmpty) {
       // 有可能一个冻结的应用都没有
-      disableAppList.addAll(disableApp.split('\n'));
+      disableAppList = parsePMOut(disableApp);
     }
     for (int i = 0; i < disableAppList.length; i++) {
       String packageName = disableAppList[i];
-      // Log.w('包名 -> $packageName apkPath -> $apkPath');
       AppInfo entity;
       try {
+        // 如果
         entitys.firstWhere((element) => element.packageName == packageName);
         entity.freeze = true;
-      } catch (e) {}
+      } catch (e) {
+        // pass
+      }
     }
-    Log.e('watch -> ${watch.elapsed}');
-    final List<AppInfo> infos = await AppUtils.getAppInfo(packages);
-    Log.e('watch -> ${watch.elapsed}');
+    final List<AppInfo> infos = await Global().appChannel.getAppInfo(packages);
     if (infos.isEmpty) {
       return;
     }
@@ -83,10 +174,9 @@ class AppManagerController extends GetxController {
       entitys[i] = entitys[i].copyWith(infos[i]);
     }
     entitys.sort(
-        (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
-    // saveImg(yylist);
-    // Log.e(await Global().process.exec('pm list package -3 -f'));
-    _userApps = entitys;
+      (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()),
+    );
+    _sysApps = entitys;
     update();
     cacheAllUserIcons(packages);
 
@@ -101,7 +191,7 @@ class AppManagerController extends GetxController {
           RuntimeEnvir.filesPath + '/AppManager/.icon/${entity.packageName}');
       if (!await cacheFile.exists()) {
         await cacheFile.writeAsBytes(
-          await AppUtils.getAppIconBytes(entity.packageName),
+          await Global().appChannel.getAppIconBytes(entity.packageName),
         );
       }
       // IconStore().cache(
@@ -116,7 +206,7 @@ class AppManagerController extends GetxController {
   Future<void> cacheAllUserIcons(List<String> packages) async {
     // 所有图
     final List<List<int>> byteList =
-        await AppUtils.getAllAppIconBytes(packages);
+        await Global().appChannel.getAllAppIconBytes(packages);
     // Log.e('allBytes -> $allBytes');
     if (byteList.isEmpty) {
       return;
@@ -144,44 +234,6 @@ class AppManagerController extends GetxController {
   //     );
   //   }
   // }
-
-  Future<void> getSysApp() async {
-    //拿到应用软件List
-    final List<AppInfo> entitys = <AppInfo>[];
-
-    final List<String> resultList =
-        (await Global().exec('pm list package -s -f -U'))
-            .replaceAll(RegExp('package:'), '')
-            .split('\n');
-    // print(resultList);
-    final List<String> packages = [];
-    for (int i = 0; i < resultList.length; i++) {
-      String uid = resultList[i].replaceAll(RegExp('.*uid:'), '');
-      // Log.w('$uid');
-      String packageName = resultList[i].replaceAll(
-        RegExp('.*=| uid:$uid'),
-        '',
-      );
-      String apkPath = resultList[i].replaceAll('=$packageName uid:$uid', '');
-      packages.add(packageName);
-      // Log.w('包名 -> $packageName apkPath -> $apkPath');
-      entitys.add(AppInfo(packageName, apkPath: apkPath, uid: uid));
-    }
-    final List<AppInfo> infos = await AppUtils.getAppInfo(packages);
-    if (infos.isEmpty) {
-      return;
-    }
-    for (int i = 0; i < infos.length; i++) {
-      entitys[i] = entitys[i].copyWith(infos[i]);
-    }
-    entitys.sort(
-        (a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
-    // saveImg(yylist);
-    // Log.e(await Global().process.exec('pm list package -3 -f'));
-    _sysApps = entitys;
-    // cacheSysIcons();
-    update();
-  }
 
   void removeEntity(AppInfo entity) {
     if (_userApps.contains(entity)) {
