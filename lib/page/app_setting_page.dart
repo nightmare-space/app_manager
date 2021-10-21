@@ -49,16 +49,16 @@ class _AppSettingPageState extends State<AppSettingPage> {
   }
 
   Future<String> getFileSize(String path) async {
-    return '123';
     return await Global().exec('stat -c "%s" $path');
   }
 
   Future<void> getDetailsInfo() async {
     AppDetails details = AppDetails();
-    details.activitys = await AppUtils.getAppActivitys(
-      widget.entity.packageName,
-    );
-    String result = await AppUtils.getAppDetails(widget.entity.packageName);
+    details.activitys = await Global().appChannel.getAppActivitys(
+          widget.entity.packageName,
+        );
+    String result =
+        await Global().appChannel.getAppDetails(widget.entity.packageName);
     List<String> results = result.split('\r');
     Log.w('result -> $results');
     details.installTime = getTimeStringFromTimestamp(results[0]);
@@ -86,9 +86,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
     details.apkSha1 = sha1;
     details.apkSha256 = sha256;
     widget.entity.details = details;
-    List<String> pers = await AppUtils.getAppPermission(
-      widget.entity.packageName,
-    );
+    List<String> pers = await Global().appChannel.getAppPermission(
+          widget.entity.packageName,
+        );
     Log.w('pers -> $pers');
     for (String line in pers) {
       String name = line.split(' ').first;
@@ -143,10 +143,12 @@ class _AppSettingPageState extends State<AppSettingPage> {
                         //       'am start -n ${widget.apps[0].packageName}/$activityName');
                         // }
 
-                        AppUtils.launchActivity(
-                          entity.packageName,
-                          await AppUtils.getAppMainActivity(entity.packageName),
-                        );
+                        Global().appChannel.launchActivity(
+                              entity.packageName,
+                              await Global()
+                                  .appChannel
+                                  .getAppMainActivity(entity.packageName),
+                            );
                         // Log.w('activityName -> $activityName');
                         // final AndroidIntent intent = AndroidIntent(
                         //   action: 'android.intent.action.MAIN',
@@ -181,10 +183,12 @@ class _AppSettingPageState extends State<AppSettingPage> {
                         // AppUtils.clearAppData(entity.packageName);
                       }),
                       buildItem('清除App数据', danger: true, onTap: () {
-                        AppUtils.clearAppData(entity.packageName);
+                        Global().appChannel.clearAppData(entity.packageName);
                       }),
                       buildItem('卸载', danger: true, onTap: () async {
-                        await AppUtils.unInstallApp(entity.packageName);
+                        await Global()
+                            .appChannel
+                            .unInstallApp(entity.packageName);
 
                         AppManagerController controller = Get.find();
                         controller.removeEntity(entity);
@@ -194,7 +198,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
                         if (entity.freeze) {
                           return buildItem('解冻', danger: false,
                               onTap: () async {
-                            await AppUtils.unFreezeApp(entity.packageName);
+                            await Global()
+                                .appChannel
+                                .unFreezeApp(entity.packageName);
                             entity.freeze = false;
                             setState(() {});
                             AppManagerController controller = Get.find();
@@ -202,8 +208,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
                           });
                         }
                         return buildItem('冻结', danger: true, onTap: () async {
-                          bool success =
-                              await AppUtils.freezeApp(entity.packageName);
+                          bool success = await Global()
+                              .appChannel
+                              .freezeApp(entity.packageName);
                           if (success) {
                             entity.freeze = true;
                             setState(() {});
@@ -219,8 +226,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
                         if (entity.hide) {
                           return buildItem('显示', danger: false,
                               onTap: () async {
-                            bool success =
-                                await AppUtils.showApp(entity.packageName);
+                            bool success = await Global()
+                                .appChannel
+                                .showApp(entity.packageName);
                             if (success) {
                               entity.hide = false;
                               setState(() {});
@@ -233,8 +241,9 @@ class _AppSettingPageState extends State<AppSettingPage> {
                           });
                         }
                         return buildItem('隐藏', danger: true, onTap: () async {
-                          bool success =
-                              await AppUtils.hideApp(entity.packageName);
+                          bool success = await Global()
+                              .appChannel
+                              .hideApp(entity.packageName);
                           if (success) {
                             entity.hide = true;
                             setState(() {});

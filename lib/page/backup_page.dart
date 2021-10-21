@@ -68,7 +68,8 @@ class _BackupPageState extends State<BackupPage> {
 
   Future<void> computeSpeed() async {
     // 这儿的apk可能还没有
-    limit = int.tryParse(await AppUtils.getFileSize(currentApp.apkPath));
+    limit = int.tryParse(await Global()
+                            .appChannel.getFileSize(currentApp.apkPath));
     current = 0;
     setState(() {});
     while (limit != current) {

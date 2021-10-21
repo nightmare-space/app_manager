@@ -1,11 +1,11 @@
 import 'package:app_manager/controller/mark_controller.dart';
+import 'package:app_manager/global/global.dart';
 import 'package:app_manager/model/mark.dart';
 import 'package:app_manager/theme/app_colors.dart';
 import 'package:app_manager/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
-import 'package:global_repository/src/utils/screen_util.dart';
 
 class MarkPage extends StatefulWidget {
   const MarkPage({Key key}) : super(key: key);
@@ -68,7 +68,9 @@ class _MarkPageState extends State<MarkPage> {
                       blurRadius: 0,
                       borderRadius: 20.w,
                       onTap: () {
-                        AppUtils.launchActivity(mark.package, mark.component);
+                        Global()
+                            .appChannel
+                            .launchActivity(mark.package, mark.component);
                       },
                       child: SizedBox(
                         width: 40.w,

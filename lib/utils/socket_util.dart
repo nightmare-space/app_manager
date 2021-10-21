@@ -24,7 +24,6 @@ class SocketWrapper {
           seconds: 3,
         ),
       );
-
       mStream = socket.asBroadcastStream();
       return true;
     } catch (e) {

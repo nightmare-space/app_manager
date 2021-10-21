@@ -1,3 +1,4 @@
+import 'package:app_manager/global/global.dart';
 import 'package:app_manager/model/app.dart';
 import 'package:app_manager/controller/app_manager_controller.dart';
 import 'package:app_manager/controller/check_controller.dart';
@@ -71,7 +72,8 @@ class _LongPressState extends State<LongPress> {
               Get.back();
               AppManagerController managerController = Get.find();
               for (AppInfo entity in controller.check) {
-                bool success = await AppUtils.freezeApp(entity.packageName);
+                bool success =
+                    await Global().appChannel.freezeApp(entity.packageName);
                 if (success) {
                   entity.freeze = true;
                   managerController.update();
@@ -84,7 +86,8 @@ class _LongPressState extends State<LongPress> {
               Get.back();
               AppManagerController managerController = Get.find();
               for (AppInfo entity in controller.check) {
-                bool success = await AppUtils.unFreezeApp(entity.packageName);
+                bool success =
+                    await Global().appChannel.unFreezeApp(entity.packageName);
                 if (success) {
                   entity.freeze = false;
                   managerController.update();
