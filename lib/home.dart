@@ -32,12 +32,6 @@ class AppManager extends StatefulWidget {
     }
     // hide 命令要root
     Global().initProcess();
-    if (RuntimeEnvir.packageName != Config.packageName) {
-      // 如果这个项目是独立运行的，那么RuntimeEnvir.packageName会在main函数中被设置成Config.packageName
-      Config.flutterPackage = 'packages/app_manager/';
-
-      Get.addPages(AppPages.routes);
-    }
     if (Get.arguments != null) {
       Global().process = Get.arguments;
     }
@@ -66,7 +60,7 @@ class _AppManagerState extends State<AppManager>
     }
     await Directory(workDir.path + '/.icon').create();
     appManagerProvider.getUserApp();
-    // appManagerProvider.getSysApp();
+    appManagerProvider.getSysApp();
   }
 
   AppManagerController appManagerProvider = Get.find();

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 
+import 'global/config.dart';
 import 'home.dart';
 import 'routes/app_pages.dart';
 
@@ -28,14 +29,13 @@ import 'routes/app_pages.dart';
 //         .............................................
 //                  佛祖保佑             永无BUG
 void main() {
-  RuntimeEnvir.initEnvirWithPackageName('com.nightmare.appmanager');
+  RuntimeEnvir.initEnvirWithPackageName(Config.packageName);
   runApp(ToastApp(
     child: GetMaterialApp(
       getPages: AppPages.routes,
       initialRoute: AppManagerRoutes.home,
     ),
   ));
-  // ImageCache().maximumSize=
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -45,5 +45,3 @@ void main() {
     ),
   );
 }
-
-void openFormPackage(YanProcess executable) {}
