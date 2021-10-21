@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:app_manager/global/global.dart';
 import 'package:app_manager/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -19,38 +20,20 @@ class AppIconHeader extends StatefulWidget {
 class _AppIconHeaderState extends State<AppIconHeader> {
   bool imgExist = false;
   bool prepare = false;
+  String iconDirPath = RuntimeEnvir.filesPath + '/AppManager/.icon';
   @override
   void initState() {
     super.initState();
     loadAppIcon();
-    // checkImageExist();
   }
 
-  // Future<void> checkImageExist() async {
-  //   if (File('${RuntimeEnvir.filesPath}/AppManager/.icon/${widget.packageName}')
-  //       .existsSync()) {
-  //     imgExist = true;
-  //     setState(() {});
-  //   } else {
-  //     await PlatformChannel.GetAppIcon.invokeMethod<void>(widget.packageName);
-  //     checkImageExist();
-  //   }
-  // }
   Future<void> loadAppIcon() async {
-    // if ((_bytes = IconStore().loadCache(widget.packageName)).isEmpty) {
-    File cacheFile = File(
-        RuntimeEnvir.filesPath + '/AppManager/.icon/${widget.packageName}');
+    File cacheFile = File('$iconDirPath/${widget.packageName}');
     if (!await cacheFile.exists()) {
       await cacheFile.writeAsBytes(
-        await AppUtils.getAppIconBytes(widget.packageName),
+        await Global().appChannel.getAppIconBytes(widget.packageName),
       );
     }
-    // _bytes = IconStore().cache(
-    //   widget.packageName,
-    //   await AppUtils.getAppIconBytes(widget.packageName),
-    // );
-    // Log.w('loadAppIcon $_bytes');
-    // }
     prepare = true;
     if (mounted) {
       setState(() {});
@@ -73,8 +56,7 @@ class _AppIconHeaderState extends State<AppIconHeader> {
         child: Padding(
           padding: widget.padding,
           child: Image.file(
-            File(RuntimeEnvir.filesPath +
-                '/AppManager/.icon/${widget.packageName}'),
+            File('$iconDirPath/${widget.packageName}'),
             gaplessPlayback: true,
           ),
         ),
