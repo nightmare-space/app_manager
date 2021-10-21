@@ -18,7 +18,7 @@ class BackupController extends GetxController {
   String backupPath = '/sdcard/YanTool/AppManager';
   Box box;
   Future<void> initBox() async {
-    getLocalData();
+    // getLocalData();
   }
 
   List<Backup> backups = [];
