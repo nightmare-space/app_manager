@@ -1,4 +1,4 @@
-import 'package:app_manager/bindings/terminal_binding.dart';
+import 'package:app_manager/bindings/app_manager_binding.dart';
 import 'package:app_manager/home.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -12,7 +12,7 @@ abstract class AppPages {
       page: () {
         return AppManager();
       },
-      binding: TerminalBinding(),
+      binding: AppManagerBinding(),
     ),
   ];
 }

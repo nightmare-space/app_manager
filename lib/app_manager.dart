@@ -2,7 +2,7 @@ library app_manager;
 
 export 'home.dart';
 export 'routes/app_pages.dart';
-export 'bindings/terminal_binding.dart';
+export 'bindings/app_manager_binding.dart';
 export 'utils/app_utils.dart';
 
 /// A Calculator.

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
+import 'bindings/app_manager_binding.dart';
 import 'global/global.dart';
 import 'page/backup_list_page.dart';
 import 'page/common_app_page.dart';
@@ -35,6 +36,7 @@ class AppManager extends StatefulWidget {
     if (Get.arguments != null) {
       Global().process = Get.arguments;
     }
+    AppManagerBinding().dependencies();
   }
   final Executable process;
   @override
