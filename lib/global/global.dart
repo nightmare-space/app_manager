@@ -36,7 +36,7 @@ class Global {
   YanProcess process = YanProcess();
   Future<void> initProcess() async {
     // TODO
-    // await process.exec('su');
+    await process.exec('su');
   }
 
   Future<String> exec(String script) {
