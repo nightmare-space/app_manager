@@ -1,4 +1,4 @@
-package com.nightmare.appmanager;
+package com.nightmare.applib;
 
 public class AppChannelProtocol {
     public static final String getIconData = "getIconData:";

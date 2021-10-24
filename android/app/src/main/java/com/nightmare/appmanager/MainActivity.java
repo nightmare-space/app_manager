@@ -8,6 +8,8 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 
+import com.nightmare.applib.AppChannel;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -23,15 +25,9 @@ public class MainActivity extends FlutterActivity {
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine);
-        initPlugin(flutterEngine);
-    }
-
-    void initPlugin(@NonNull FlutterEngine flutterEngine) {
         new Thread(() -> {
-            GetApp(flutterEngine);
-            App(flutterEngine);
+            initPlugin(flutterEngine);
         }).start();
-
         new Thread(() -> {
             try {
                 AppChannel.startServer(getApplicationContext());
@@ -42,32 +38,12 @@ public class MainActivity extends FlutterActivity {
     }
 
 
-    void GetApp(@NonNull FlutterEngine flutterEngine) {
-
-        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "jump").setMethodCallHandler((call, result) -> {
-            new Thread(() -> {
-                // try catch 一下
-                try {
-                    List<String> arg = stringToList(call.method);
-                    Intent intent = new Intent();
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    ComponentName cName = new ComponentName(arg.get(0), arg.get(1));
-                    intent.setComponent(cName);
-                    startActivity(intent);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        });
-    }
-
-
     private List<String> stringToList(String strs) {
         String[] str = strs.split("\n");
         return Arrays.asList(str);
     }
 
-    void App(@NonNull FlutterEngine flutterEngine) {
+    void initPlugin(@NonNull FlutterEngine flutterEngine) {
         MethodChannel appChannel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "app_manager");
         appChannel.setMethodCallHandler((call, result) -> new Thread(() -> {
             switch (call.method) {
@@ -85,7 +61,20 @@ public class MainActivity extends FlutterActivity {
                     shareIntent.setType("*/*");//此处可发送多种文件
                     startActivity(Intent.createChooser(shareIntent, "分享到"));
                     break;
-
+                case "openActivity":
+                    new Thread(() -> {
+                        // try catch 一下
+                        try {
+                            List<String> arg = stringToList(call.method);
+                            Intent intent = new Intent();
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            ComponentName cName = new ComponentName(arg.get(0), arg.get(1));
+                            intent.setComponent(cName);
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
             }
         }).start());
     }

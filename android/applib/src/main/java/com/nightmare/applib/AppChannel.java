@@ -1,11 +1,19 @@
-package com.nightmare.appmanager;
+package com.nightmare.applib;
 
 import android.annotation.SuppressLint;
-import android.content.*;
-import android.content.pm.*;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.*;
+import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
