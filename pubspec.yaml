@@ -4,13 +4,13 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   # path_provider: ^2.0.7
-  android_intent_plus: ^1.0.2
+  android_intent_plus: ^5.1.0
   # Flutter 的一些动画
   flutter_spinkit: ^5.1.0
 
@@ -24,13 +24,12 @@ dependencies:
   hive: ^2.0.4
   app_channel:
     git:
-      url: https://github.com/nightmare-space/applib
-      path: app_channel
+      url: https://github.com/nightmare-space/app_channel
   adbutil:
     git: https://github.com/nightmare-space/adbutil
   file_manager_view:
     git: https://github.com/nightmare-space/file_manager_view.git
-  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -40,8 +39,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
-    
-dependency_overrides:
-  app_channel:
-    path: ../app_channel
-  flutter_svg: ^1.1.6

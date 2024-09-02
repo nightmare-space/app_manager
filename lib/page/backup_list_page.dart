@@ -1,9 +1,6 @@
 import 'package:app_manager/controller/backup_controller.dart';
-import 'package:app_manager/controller/mark_controller.dart';
 import 'package:app_manager/model/backup.dart';
-import 'package:app_manager/model/mark.dart';
 import 'package:app_manager/theme/app_colors.dart';
-import 'package:app_manager/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
@@ -12,7 +9,7 @@ class BackupListPage extends StatefulWidget {
   const BackupListPage({Key? key}) : super(key: key);
 
   @override
-  _BackupListPageState createState() => _BackupListPageState();
+  State createState() => _BackupListPageState();
 }
 
 class _BackupListPageState extends State<BackupListPage> {
@@ -27,7 +24,7 @@ class _BackupListPageState extends State<BackupListPage> {
           padding: const EdgeInsets.only(bottom: 60),
           physics: const BouncingScrollPhysics(),
           itemBuilder: (BuildContext c, int i) {
-            Backup backup= context.backups.elementAt(i);
+            Backup backup = context.backups.elementAt(i);
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -53,11 +50,9 @@ class _BackupListPageState extends State<BackupListPage> {
                           SizedBox(
                             height: 2.w,
                           ),
-                          
                         ],
                       ),
                     ),
-                   
                   ],
                 ),
               ),

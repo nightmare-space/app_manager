@@ -1,2 +1,6 @@
 dependency_overrides:
-  app_channel: /Users/nightmare/Desktop/nightmare-space/app_channel
+  app_channel:
+    path: /Users/nightmare/Desktop/nightmare-space/app_channel
+  global_repository:
+    path: ../../nightmare-space/global_repository
+  permission_handler: 11.3.1

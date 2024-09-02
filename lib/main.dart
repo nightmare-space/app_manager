@@ -30,12 +30,7 @@ import 'routes/app_pages.dart';
 Future<void> main() async {
   RuntimeEnvir.initEnvirWithPackageName(Config.packageName);
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(ToastApp(
-    child: GetMaterialApp(
-      getPages: AppPages.routes,
-      initialRoute: AppManagerRoutes.home,
-    ),
-  ));
+  runApp(const AppManager());
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -45,4 +40,34 @@ Future<void> main() async {
   );
   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
   // await FlutterDisplayMode.setHighRefreshRate();
+}
+
+class AppManager extends StatefulWidget {
+  const AppManager({Key? key}) : super(key: key);
+
+  @override
+  State<AppManager> createState() => _AppManagerState();
+}
+
+class _AppManagerState extends State<AppManager> {
+  @override
+  Widget build(BuildContext context) {
+    return ToastApp(
+      child: LayoutBuilder(
+        builder: (context, con) {
+          return ScreenQuery(
+            uiWidth: 414,
+            screenWidth: con.maxWidth,
+            child: GetMaterialApp(
+              getPages: AppPages.routes,
+              initialRoute: AppManagerRoutes.home,
+              builder: (context, child) {
+                return child ?? const SizedBox();
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
 }

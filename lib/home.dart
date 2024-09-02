@@ -1,19 +1,13 @@
-import 'dart:io';
 import 'package:app_manager/global/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
-import 'bindings/app_manager_binding.dart';
 import 'global/global.dart';
-import 'page/backup_list_page.dart';
 import 'modules/app_page/app_list_page.dart';
-import 'page/long_press_dialog.dart';
 import 'controller/app_manager_controller.dart';
 import 'controller/check_controller.dart';
-import 'page/mark_page.dart';
-import 'routes/app_pages.dart';
 import 'widgets/search_box.dart';
 
 class AppManagerWithoutMaterialpp extends StatelessWidget {
@@ -52,7 +46,6 @@ class _AppManagerEntryPointState extends State<AppManagerEntryPoint> with Single
     super.initState();
     controller.init();
   }
-
 
   AppManagerController appManagerProvider = Get.find();
   CheckController checkController = Get.find();
@@ -96,12 +89,12 @@ class _AppManagerEntryPointState extends State<AppManagerEntryPoint> with Single
                     child: <Widget>[
                       AppListPage(
                         key: const Key('user'),
-                        appList: ctl.userApps,
+                        appInfos: ctl.userApps,
                         filter: filter.toLowerCase(),
                       ),
                       AppListPage(
                         key: const Key('sys'),
-                        appList: ctl.sysApps,
+                        appInfos: ctl.sysApps,
                         filter: filter.toLowerCase(),
                       ),
                       // const MarkPage(),

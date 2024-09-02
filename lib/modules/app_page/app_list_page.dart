@@ -1,23 +1,22 @@
 import 'package:app_channel/app_channel.dart';
 import 'package:app_manager/controller/app_manager_controller.dart';
-import 'package:app_manager/page/app_setting_page.dart';
 import 'package:app_manager/controller/check_controller.dart';
 import 'package:app_manager/theme/app_colors.dart';
-import 'package:app_manager/widgets/app_icon_header.dart';
+import 'package:app_manager/widgets/app_icon.dart';
+import 'package:app_manager/widgets/highlight_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
-import '../../widgets/highlight_text.dart';
 
 class AppListPage extends StatefulWidget {
   const AppListPage({
     Key? key,
-    this.appList = const [],
+    this.appInfos = const AppInfos(infos: []),
     this.filter = '',
   }) : super(key: key);
-  final List<AppInfo> appList;
+  final AppInfos appInfos;
   final String filter;
   @override
   AppListPageState createState() => AppListPageState();
@@ -38,24 +37,24 @@ class AppListPageState extends State<AppListPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<AppInfo> apps = List.from(widget.appList);
-    if (apps.isEmpty) {
+    AppInfos apps = AppInfos(infos: List.from(widget.appInfos.infos));
+    if (apps.infos.isEmpty) {
       return const SpinKitThreeBounce(color: AppColors.accentColor, size: 16.0);
     } else {
       if (widget.filter.isNotEmpty) {
         // 移除不包含关键字的item
-        apps.removeWhere((element) {
+        apps.infos.removeWhere((element) {
           return !element.appName.toLowerCase().contains(widget.filter) && !element.package.toLowerCase().contains(widget.filter);
         });
       }
       return ListView.builder(
         controller: _scrollController,
-        itemCount: apps.length,
+        itemCount: apps.infos.length,
         padding: const EdgeInsets.only(bottom: 60),
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext c, int i) {
           return AppItem(
-            entity: apps[i],
+            entity: apps.infos[i],
             filter: widget.filter,
           );
         },
@@ -170,10 +169,10 @@ class _AppItemState extends State<AppItem> {
                             SizedBox(
                               width: 60,
                               height: 60,
-                              child: AppIconHeader(
+                              child: AppIcon(
                                 key: Key(entity.package),
                                 packageName: entity.package,
-                                channel: am.curChannel,
+                                channel: am.appChannel,
                               ),
                             ),
                             Expanded(

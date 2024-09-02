@@ -1,10 +1,6 @@
 import 'package:app_channel/app_channel.dart';
-import 'package:app_manager/controller/app_manager_controller.dart';
-import 'package:app_manager/controller/check_controller.dart';
 import 'package:app_manager/theme/app_colors.dart';
-import 'package:app_manager/utils/app_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 
@@ -15,7 +11,7 @@ class BackupSheet extends StatefulWidget {
   final List<AppInfo?> entitys;
 
   @override
-  _BackupSheetState createState() => _BackupSheetState();
+  State createState() => _BackupSheetState();
 }
 
 class _BackupSheetState extends State<BackupSheet> {
@@ -45,9 +41,7 @@ class _BackupSheetState extends State<BackupSheet> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 16,
-            ),
+            SizedBox(height: 16.w),
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -92,12 +86,12 @@ class _BackupSheetState extends State<BackupSheet> {
               color: AppColors.accentColor,
               onTap: () {
                 Get.back();
-                Get.to(
-                  BackupPage(
-                    entitys: widget.entitys,
-                  ),
-                  preventDuplicates: false,
-                );
+                // Get.to(
+                //   BackupPage(
+                //     entitys: widget.entitys,
+                //   ),
+                //   preventDuplicates: false,
+                // );
               },
               child: SizedBox(
                 height: 48,
